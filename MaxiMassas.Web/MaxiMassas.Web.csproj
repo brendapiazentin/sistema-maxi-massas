@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\MaxiMassas.Negocio\MaxiMassas.Negocio.csproj" />
@@ -17,6 +17,7 @@
     <RollForward>Major</RollForward>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>a2c168a6-f747-4a70-825e-437af8bc1d6b</UserSecretsId>
   </PropertyGroup>
 
 </Project>
