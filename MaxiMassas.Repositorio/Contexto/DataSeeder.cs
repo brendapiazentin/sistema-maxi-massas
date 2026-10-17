@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 // Seed: aplica migrations e cria o admin padrao se nao existir.
 using MaxiMassas.Modelos;
 using Microsoft.EntityFrameworkCore;

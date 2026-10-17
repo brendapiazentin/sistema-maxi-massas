@@ -1,6 +1,5 @@
 using FluentValidation;
 using MaxiMassas.Modelos.Dtos.Request;
-using MaxiMassas.Negocio;
 
 namespace MaxiMassas.Modelos.Validadores;
 
