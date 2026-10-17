@@ -345,3 +345,18 @@ vir no meio de um texto longo em inglês; procure a frase da primeira coluna.
 | `Unable to resolve service for type 'MaxiMassas.Negocio.ClienteNegocio' while attempting to activate '...ClientesController'` | A classe de negócio não foi registrada no `Program.cs`. | Acrescente o `AddScoped` dela nos **dois** `Program.cs` (ver [INJECAO-DE-DEPENDENCIA.md](INJECAO-DE-DEPENDENCIA.md), seção 7). |
 | `Some services are not able to be constructed` e o sistema nem sobe | Um repositório não foi registrado no `Program.cs`. | Acrescente o `AddScoped<IInterface, Classe>` dele nos dois `Program.cs`. |
 | Erro de compilação dizendo que um arquivo está em uso por outro processo (`MaxiMassas.Web` ou `MaxiMassas.Api`) | O sistema ainda está rodando e segura os arquivos. | Pare a execução (**Shift+F5** no Visual Studio, **Ctrl+C** no terminal) e compile de novo. |
+
+## Configuração do banco na sua máquina (User Secrets)
+
+O `appsettings.json` guarda apenas um valor padrão (`Server=localhost`). Cada integrante define a connection string da própria máquina com o *User Secrets* do .NET, sem alterar arquivos do repositório. Na pasta do `.sln`, execute (ajuste o `Server=` ao seu SQL Server; para a instância Express, use `localhost\SQLEXPRESS`):
+
+```bash
+dotnet user-secrets set "ConnectionStrings:Padrao" 'Server=localhost\SQLEXPRESS;Database=MaxiMassas;Trusted_Connection=True;TrustServerCertificate=True' --project MaxiMassas.Web
+dotnet user-secrets set "ConnectionStrings:Padrao" 'Server=localhost\SQLEXPRESS;Database=MaxiMassas;Trusted_Connection=True;TrustServerCertificate=True' --project MaxiMassas.Api
+```
+
+Depois, crie o banco com a migration:
+
+```bash
+dotnet ef database update --project MaxiMassas.Repositorio --startup-project MaxiMassas.Api
+```
