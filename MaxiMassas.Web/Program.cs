@@ -1,8 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using MaxiMassas.Negocio;
-using MaxiMassas.Repositorio;
 using MaxiMassas.Repositorio.Contexto;
-using MaxiMassas.Repositorio.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,12 +25,7 @@ var connectionString = builder.Configuration.GetConnectionString("Padrao")
 //    e esta connection string".
 builder.Services.AddDbContext<AppDbContext>(opcoes => opcoes.UseSqlServer(connectionString));
 
-// 2) O repositório: "quando alguém pedir um IClienteRepositorio (a interface),
-//    entregue um ClienteRepositorio (a classe)".
-builder.Services.AddScoped<IClienteRepositorio, ClienteRepositorio>();
-
-// 3) O negócio: "quando alguém pedir um ClienteNegocio, crie um".
-builder.Services.AddScoped<ClienteNegocio>();
+// (Repositórios e classes de negócio são registrados nas PRs seguintes.)
 
 // AddScoped = um objeto novo para cada requisição (cada clique na Web, cada chamada
 // da API), jogado fora quando a resposta sai. O AddDbContext funciona do mesmo jeito:

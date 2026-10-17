@@ -2,18 +2,13 @@ using MaxiMassas.Modelos;
 
 namespace MaxiMassas.Repositorio.Interfaces;
 
-// Contrato do repositório. A camada Negocio conhece só esta interface,
-// nunca a classe concreta — assim dá para trocar EF por Dapper sem mexer no negócio.
-public interface IClienteRepositorio
+public interface IClienteRepositorio : IRepositorio<Cliente>
 {
-    List<Cliente> Listar();
-    Cliente? ObterPorId(int id);
-    bool EmailEmUso(string email, int? ignorarId = null);
-    bool CpfEmUso(string cpf, int? ignorarId = null);
-    void Adicionar(Cliente cliente);
-    void Atualizar(Cliente cliente);
-    void Remover(Cliente cliente);
+    Task<IEnumerable<Cliente>> SearchByNomeAsync(string nome);
+    Task<Cliente?> GetByEmailAsync(string email);
+    /// <summary>Cliente com os endereços salvos, RASTREADO (para alterar e salvar).</summary>
+    Task<Cliente?> GetComEnderecosAsync(int id);
 
-    // Executa a stored procedure sp_Clientes_BuscarPorNome.
-    List<Cliente> BuscarPorNome(string trecho);
+    /// <summary>Cliente com conta no app (e-mail + senha), RASTREADO. Usado no "esqueci minha senha" do app.</summary>
+    Task<Cliente?> GetContaAppPorEmailAsync(string emailMinusculo);
 }

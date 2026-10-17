@@ -1,0 +1,11 @@
+using MaxiMassas.Modelos;
+
+namespace MaxiMassas.Repositorio.Interfaces;
+
+public interface IVendaRepositorio : IRepositorio<Venda>
+{
+    Task<Venda?> GetVendaComDetalhesAsync(int id);
+    Task<IEnumerable<Venda>> GetVendasPorPeriodoAsync(DateTime inicio, DateTime fim);
+    Task<IEnumerable<Venda>> GetVendasComDetalhesAsync();
+    Task<IEnumerable<Venda>> GetVendasDoClienteAsync(int clienteId);
+}
