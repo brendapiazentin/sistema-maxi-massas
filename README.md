@@ -1,4 +1,4 @@
-# NomeDoSistema — estrutura base do PIM IV
+# MaxiMassas — estrutura base do PIM IV
 
 Esta é a solution pronta na organização que o **Manual do PIM IV (Etapa 4)** exige:
 cinco projetos, as referências no sentido certo, Entity Framework Core e Dapper
@@ -9,30 +9,30 @@ seguindo o mesmo molde.
 ## O que já vem pronto
 
 ```
-NomeDoSistema.sln
+MaxiMassas.sln
 │
-├── NomeDoSistema.Modelos       Biblioteca de classes
+├── MaxiMassas.Modelos       Biblioteca de classes
 │   ├── Cliente.cs                 entidade com validações básicas
 │   └── Dtos/
 │       ├── ClienteDto.cs          o que o sistema mostra (telas da Web e JSON da Api)
 │       └── ClienteSalvarDto.cs    o que o usuário preenche (formulários e POST/PUT)
 │
-├── NomeDoSistema.Repositorio   Biblioteca de classes (EF Core + Dapper)
+├── MaxiMassas.Repositorio   Biblioteca de classes (EF Core + Dapper)
 │   ├── Contexto/AppDbContext.cs   DbContext, mapeamento e HasTrigger
 │   ├── Interfaces/IClienteRepositorio.cs
 │   ├── ClienteRepositorio.cs      cadastro com EF Core, procedure com Dapper
 │   └── Migrations/                cria a tabela, a trigger e a procedure
 │
-├── NomeDoSistema.Negocio       Biblioteca de classes
+├── MaxiMassas.Negocio       Biblioteca de classes
 │   ├── ClienteNegocio.cs          regras: CPF com 11 dígitos, e-mail e CPF únicos
 │   └── RegraDeNegocioException.cs
 │
-├── NomeDoSistema.Web           ASP.NET Core MVC (Razor)
+├── MaxiMassas.Web           ASP.NET Core MVC (Razor)
 │   ├── Program.cs                 injeção de dependência (igual à da Api)
 │   ├── Controllers/ClientesController.cs
 │   └── Views/Clientes/            Index, Criar, Editar, Excluir e a partial _Formulario
 │
-└── NomeDoSistema.Api           ASP.NET Core Web API (para o app Flutter)
+└── MaxiMassas.Api           ASP.NET Core Web API (para o app Flutter)
     ├── Program.cs                 injeção de dependência, OpenAPI e Scalar
     └── Controllers/ClientesController.cs
 ```
@@ -77,7 +77,7 @@ O sistema usa **SQL Server**. A connection string fica no `appsettings.json` da
 Web **e** no da Api (chave `Padrao`), e vem assim:
 
 ```json
-"Padrao": "Server=localhost;Database=NomeDoSistema;Trusted_Connection=True;TrustServerCertificate=True"
+"Padrao": "Server=localhost;Database=MaxiMassas;Trusted_Connection=True;TrustServerCertificate=True"
 ```
 
 Antes de tudo, confira se o `Server=` bate com o SQL Server da sua máquina.
@@ -101,7 +101,7 @@ só (`localhost\SQLEXPRESS`); no JSON, com duas.
 O que cada parte da connection string faz:
 
 - `Server=localhost` diz em qual SQL Server conectar.
-- `Database=NomeDoSistema` é o nome do banco que será criado. Pode trocar pelo
+- `Database=MaxiMassas` é o nome do banco que será criado. Pode trocar pelo
   nome do sistema do grupo.
 - `Trusted_Connection=True` entra no SQL Server com o seu usuário do Windows,
   sem senha — o mesmo jeito que o SSMS entra com *Autenticação do Windows*. Se
@@ -116,7 +116,7 @@ Mudou o `Server=`? Mude nos **dois** `appsettings.json` (Web e Api).
 
 ### 1. Criar o banco
 
-O banco nasce da migration, que cria o banco `NomeDoSistema`, a tabela
+O banco nasce da migration, que cria o banco `MaxiMassas`, a tabela
 `Clientes`, a trigger `TR_Clientes_DataAtualizacao` e a procedure
 `sp_Clientes_BuscarPorNome`. Você não precisa criar nada no SSMS antes.
 
@@ -127,25 +127,25 @@ dotnet tool install --global dotnet-ef
 ```
 
 ```bash
-dotnet ef database update --project NomeDoSistema.Repositorio --startup-project NomeDoSistema.Api
+dotnet ef database update --project MaxiMassas.Repositorio --startup-project MaxiMassas.Api
 ```
 
 O primeiro comando só é necessário uma vez por máquina. Se ele disser que a
 ferramenta já está instalada, siga para o segundo. No fim, o segundo escreve
 `Done.`
 
-**Pelo Visual Studio**: clique com o botão direito em `NomeDoSistema.Api` no
+**Pelo Visual Studio**: clique com o botão direito em `MaxiMassas.Api` no
 Gerenciador de Soluções e escolha *Definir como Projeto de Inicialização*. Abra
 o menu *Ferramentas › Gerenciador de Pacotes do NuGet › Console do Gerenciador
 de Pacotes*. Na caixa *Projeto padrão*, no alto do console, escolha
-`NomeDoSistema.Repositorio`. Depois digite no console:
+`MaxiMassas.Repositorio`. Depois digite no console:
 
 ```
 Update-Database
 ```
 
 Para conferir, abra o SSMS, conecte no seu servidor e expanda *Bancos de
-Dados*: o banco `NomeDoSistema` aparece ali (se não aparecer, clique com o
+Dados*: o banco `MaxiMassas` aparece ali (se não aparecer, clique com o
 botão direito em *Bancos de Dados* › *Atualizar*). Dentro dele, a tabela fica
 em *Tabelas*, a procedure em *Programação › Procedimentos Armazenados* e a
 trigger em *Tabelas › dbo.Clientes › Gatilhos*.
@@ -179,13 +179,13 @@ explica esse mecanismo em detalhe.
 **Pelo terminal**:
 
 ```bash
-dotnet run --project NomeDoSistema.Api
+dotnet run --project MaxiMassas.Api
 ```
 
 Abra `http://localhost:5218/scalar` no navegador: aparece a tela do **Scalar**,
 com todos os endpoints da API (veja "Como testar pela tela", mais abaixo).
 
-**Pelo Visual Studio**: botão direito em `NomeDoSistema.Api` › *Definir como
+**Pelo Visual Studio**: botão direito em `MaxiMassas.Api` › *Definir como
 Projeto de Inicialização* e **F5**. O navegador abre sozinho no Scalar, no
 endereço `https` (`https://localhost:7077/scalar`); na primeira vez o Visual
 Studio pede para confiar no certificado de desenvolvimento — aceite.
@@ -195,14 +195,14 @@ Studio pede para confiar no certificado de desenvolvimento — aceite.
 **Pelo terminal**, em outra janela:
 
 ```bash
-dotnet run --project NomeDoSistema.Web
+dotnet run --project MaxiMassas.Web
 ```
 
 Abra `http://localhost:5157/Clientes`.
 
 **Pelo Visual Studio**: botão direito na solution › *Configurar Projetos de
 Inicialização* › *Vários projetos de inicialização*, marque *Iniciar* em
-`NomeDoSistema.Web` e em `NomeDoSistema.Api`, e **F5**. Assim os dois sobem
+`MaxiMassas.Web` e em `MaxiMassas.Api`, e **F5**. Assim os dois sobem
 juntos, cada um no seu navegador. A Web abre em `https://localhost:7241`;
 clique em *Clientes* no menu.
 
@@ -242,10 +242,10 @@ O Scalar não é quem documenta a API: ele só **lê** o documento OpenAPI
 isso, todo endpoint novo que o grupo criar aparece ali sozinho, sem configurar
 nada.
 
-### Como testar pelo editor: o arquivo `NomeDoSistema.Api.http`
+### Como testar pelo editor: o arquivo `MaxiMassas.Api.http`
 
 Para repetir os mesmos testes várias vezes, há também o arquivo
-`NomeDoSistema.Api.http`, que já vem com todas as chamadas acima, na ordem
+`MaxiMassas.Api.http`, que já vem com todas as chamadas acima, na ordem
 certa (cadastrar, listar, alterar, buscar, excluir) e com a resposta esperada
 escrita em cima de cada uma. Com a Api rodando:
 
@@ -271,14 +271,14 @@ montam todas as chamadas sozinhas.
 
 ## Trocar o nome do sistema
 
-Como no manual, a estrutura vem com o nome `NomeDoSistema`, e cada grupo troca
+Como no manual, a estrutura vem com o nome `MaxiMassas`, e cada grupo troca
 pelo nome do próprio sistema. Faça isso **antes** de escrever qualquer código,
 porque depois fica muito mais trabalhoso:
 
 1. Feche o Visual Studio.
-2. Renomeie as cinco pastas e os cinco `.csproj` (`NomeDoSistema.Web` →
+2. Renomeie as cinco pastas e os cinco `.csproj` (`MaxiMassas.Web` →
    `CopaTickets.Web`, e assim por diante) e o `.sln`.
-3. Troque o texto `NomeDoSistema` pelo novo nome em **todos** os arquivos da
+3. Troque o texto `MaxiMassas` pelo novo nome em **todos** os arquivos da
    pasta, inclusive o `.sln`, os `.csproj` e os dois `appsettings.json`:
    - **no VS Code**: abra a pasta, menu *Editar › Substituir nos arquivos*
      (**Ctrl+Shift+H**), preencha os dois campos e clique em *Substituir tudo*;
@@ -310,8 +310,8 @@ Cliente, sempre de baixo para cima:
 7. Gere a migration e atualize o banco:
 
 ```bash
-dotnet ef migrations add NomeDaMudanca --project NomeDoSistema.Repositorio --startup-project NomeDoSistema.Api
-dotnet ef database update --project NomeDoSistema.Repositorio --startup-project NomeDoSistema.Api
+dotnet ef migrations add NomeDaMudanca --project MaxiMassas.Repositorio --startup-project MaxiMassas.Api
+dotnet ef database update --project MaxiMassas.Repositorio --startup-project MaxiMassas.Api
 ```
 
 No Console do Gerenciador de Pacotes do Visual Studio, os mesmos dois passos
@@ -325,7 +325,7 @@ são `Add-Migration NomeDaMudanca` e `Update-Database`.
 - **Trigger e procedure não são gerados pelo EF.** Escreva o SQL à mão dentro
   da migration com `migrationBuilder.Sql(...)`, como na migration `Inicial`.
   Para ter o script SQL completo do banco (útil no documento da Etapa 3), rode
-  `dotnet ef migrations script --project NomeDoSistema.Repositorio --startup-project NomeDoSistema.Api -o banco.sql`.
+  `dotnet ef migrations script --project MaxiMassas.Repositorio --startup-project MaxiMassas.Api -o banco.sql`.
 - **Consulta sempre parametrizada.** No Dapper, os valores vão num objeto
   separado (`new { Trecho = trecho }`), nunca concatenados na string do SQL.
   É isso que impede SQL Injection.
@@ -339,9 +339,9 @@ vir no meio de um texto longo em inglês; procure a frase da primeira coluna.
 |---|---|---|
 | `error: 26 - Error Locating Server/Instance Specified` | O `Server=` do `appsettings.json` não é o nome do seu SQL Server. | Descubra o nome certo (seção 0) e corrija nos **dois** `appsettings.json`. |
 | `A cadeia de certificação foi emitida por uma autoridade que não é de confiança` | Falta `TrustServerCertificate=True` na connection string. | Acrescente no fim da connection string, nos dois arquivos. |
-| `Cannot open database "NomeDoSistema" requested by the login. The login failed.` | O banco ainda não foi criado. | Rode o `dotnet ef database update` ou o `Update-Database` (seção 1). |
+| `Cannot open database "MaxiMassas" requested by the login. The login failed.` | O banco ainda não foi criado. | Rode o `dotnet ef database update` ou o `Update-Database` (seção 1). |
 | `Invalid column name 'Observacao'` | Você acrescentou uma propriedade na entidade, mas não gerou a migration, e a coluna não existe no banco. | Gere uma migration e atualize o banco (passo 7 de "Como criar a próxima entidade"). |
 | `The model for context 'AppDbContext' has pending changes. Add a new migration before updating the database.` | Mesmo caso acima, visto pelo `database update`: a entidade mudou e não existe migration para a mudança. | `dotnet ef migrations add NomeDaMudanca ...` e depois o `database update`. |
-| `Unable to resolve service for type 'NomeDoSistema.Negocio.ClienteNegocio' while attempting to activate '...ClientesController'` | A classe de negócio não foi registrada no `Program.cs`. | Acrescente o `AddScoped` dela nos **dois** `Program.cs` (ver [INJECAO-DE-DEPENDENCIA.md](INJECAO-DE-DEPENDENCIA.md), seção 7). |
+| `Unable to resolve service for type 'MaxiMassas.Negocio.ClienteNegocio' while attempting to activate '...ClientesController'` | A classe de negócio não foi registrada no `Program.cs`. | Acrescente o `AddScoped` dela nos **dois** `Program.cs` (ver [INJECAO-DE-DEPENDENCIA.md](INJECAO-DE-DEPENDENCIA.md), seção 7). |
 | `Some services are not able to be constructed` e o sistema nem sobe | Um repositório não foi registrado no `Program.cs`. | Acrescente o `AddScoped<IInterface, Classe>` dele nos dois `Program.cs`. |
-| Erro de compilação dizendo que um arquivo está em uso por outro processo (`NomeDoSistema.Web` ou `NomeDoSistema.Api`) | O sistema ainda está rodando e segura os arquivos. | Pare a execução (**Shift+F5** no Visual Studio, **Ctrl+C** no terminal) e compile de novo. |
+| Erro de compilação dizendo que um arquivo está em uso por outro processo (`MaxiMassas.Web` ou `MaxiMassas.Api`) | O sistema ainda está rodando e segura os arquivos. | Pare a execução (**Shift+F5** no Visual Studio, **Ctrl+C** no terminal) e compile de novo. |
