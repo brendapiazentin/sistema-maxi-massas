@@ -1,31 +1,19 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using MaxiMassas.Web.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MaxiMassas.Web.Controllers;
 
+/// <summary>Raiz do site: o painel abre no Dashboard (ou no login, se não houver sessão).</summary>
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    [HttpGet("/")]
+    public IActionResult Index() => RedirectToAction("Index", "Dashboard");
 
-    public HomeController(ILogger<HomeController> logger)
-    {
-        _logger = logger;
-    }
-
-    public IActionResult Index()
-    {
-        return View();
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
+    [AllowAnonymous]
+    [HttpGet("/Erro")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+        => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }

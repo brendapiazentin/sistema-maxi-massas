@@ -326,4 +326,9 @@ public class VendaNegocio : IVendaNegocio
         _vendaRepo.Remove(v);
         return await _vendaRepo.SaveChangesAsync();
     }
+
+    private const int LimitePedidosAviso = 20;
+
+    public Task<PedidosAppPendentesResponse> GetPedidosAppPendentesAsync()
+        => _vendaRepo.GetPedidosAppPendentesAsync(AppClienteNegocio.OrigemApp, LimitePedidosAviso);
 }
