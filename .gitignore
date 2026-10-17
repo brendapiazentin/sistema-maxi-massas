@@ -483,3 +483,4 @@ $RECYCLE.BIN/
 
 # Criado automaticamente pelo Copilot do Visual Studio; não faz parte do template
 .github/copilot-instructions.md
+deploy/saida/
