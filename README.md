@@ -47,6 +47,23 @@ nem o Repositório diretamente (a única exceção é o registro de serviços no
 `Banco:AplicarMigrationsAoIniciar` (appsettings) controla se as migrations e o seeder
 rodam ao iniciar; use `false` para subir o site sem banco (apenas testes de rota).
 
+## Hospedagem (AWS)
+
+Ambiente de demonstração em produção:
+
+| Componente | Serviço | Observação |
+|---|---|---|
+| Banco | Amazon RDS, SQL Server Express (`db.t3.micro`) | Criado e atualizado por `dotnet ef database update` |
+| Web e Api | Amazon EC2 (Ubuntu 24.04, `t3.micro`) | Publicação auto-contida para `linux-x64`; serviços `systemd`; proxy Nginx |
+| Endereço | IP elástico + subdomínio DuckDNS + Let's Encrypt | `https://maximassasitapolis.duckdns.org` (Web) e `/api/app/*` (Api do app) |
+
+Scripts em `deploy/`:
+- `publicar.sh IP chave.pem`: publica Web e Api e envia ao servidor.
+- `servidor-instalar.sh` (no servidor): instala Nginx e cria os serviços.
+- `servidor-https.sh DOMINIO EMAIL` (no servidor): emite o certificado e configura HTTPS.
+
+A connection string do servidor fica em `/etc/maximassas/*.env`, fora do código. O backup automático do sistema (`BackupService`) grava em disco local e não se aplica ao RDS, que mantém seu próprio backup automático.
+
 ## Notas de segurança (a tratar antes de produção)
 
 - Senha inicial do administrador é conhecida; alterar no primeiro acesso.
