@@ -1,0 +1,99 @@
+@model EvolucaoViewModel
+@{
+    // Herdado do antigo HTML estático; os dados dos gráficos agora vêm do servidor (Evolucao.cshtml.cs).
+    ViewData["Title"] = "Evolução";
+}
+
+    <main class="conteudo-pagina flex-grow-1">
+    <!-- HEADER PADRÃO -->
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="titulo-pagina mb-0">Evolução</h2>
+           
+            <!-- Data atualizada Tablet/Desktop: Aparece apenas para telas maiores -->
+            <span class="data-pagina d-none d-md-block" id="data-atual"></span>
+        </header>
+
+    @if (!Model.VeFinanceiro)
+    {
+        <div class="alert alert-secondary py-2" role="note">Os gráficos de faturamento e lucro estão disponíveis para administradores.</div>
+    }
+
+    @if (Model.VeFinanceiro)
+    {
+        <!-- Exportar relatório (Excel / PDF) do período escolhido -->
+        <div class="card border-0 shadow-sm p-3 p-md-4 mb-4">
+            <h5 class="titulo-card-evo m-0">Exportar relatório</h5>
+            <p class="subtitulo-card-evo mb-3">Resumo financeiro, produtos mais vendidos, histórico de vendas e melhores clientes do período.</p>
+
+            @if (Model.ErroExportacao is not null)
+            {
+                <div class="alert alert-danger py-2 small" role="alert">@Model.ErroExportacao</div>
+            }
+
+            @* GET: o navegador baixa o arquivo e continua nesta página. O botão clicado manda handler=Excel ou Pdf. *@
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-6 col-md-3">
+                    <label class="form-label-custom" for="exportarInicio">Início</label>
+                    <input type="date" class="form-control form-control-custom w-100" id="exportarInicio" name="inicio"
+                           value="@Model.ExportarInicio.ToString("yyyy-MM-dd")" required>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label-custom" for="exportarFim">Fim</label>
+                    <input type="date" class="form-control form-control-custom w-100" id="exportarFim" name="fim"
+                           value="@Model.ExportarFim.ToString("yyyy-MM-dd")" required>
+                </div>
+                <div class="col-6 col-md-3">
+                    <button type="submit" name="handler" value="Excel" class="btn-salvar-custom w-100">Baixar Excel</button>
+                </div>
+                <div class="col-6 col-md-3">
+                    <button type="submit" name="handler" value="Pdf" class="btn-secundario w-100">Baixar PDF</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <!-- Filtros de Botão -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <button type="button" class="btn-filtro-evo">Dia do Mês</button>
+        <button type="button" class="btn-filtro-evo">Semana</button>
+        <button type="button" class="btn-filtro-evo active">Mês</button>
+        <button type="button" class="btn-filtro-evo">Ano</button>
+    </div>
+
+    <!-- Card 1: Faturamento e Lucro -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-2 p-md-4">
+                <div class="mb-1">
+                    <h5 class="titulo-card-evo m-0">Faturamento e Lucro</h5>
+                    <p class="subtitulo-card-evo m-0">Receita bruta (linha) e lucro líquido (barras)</p>
+                </div>
+                <div style="position: relative; height: 350px; width: 100%;">
+                    <canvas id="chartFaturamento"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Produtos Mais Vendidos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-2 p-md-4">
+                <div class="mb-1">
+                    <h5 class="titulo-card-evo m-0">Produtos Mais Vendidos</h5>
+                    <p class="subtitulo-card-evo m-0">Quantidade mais vendidos (barras) e faturamento mais vendidos (linha)</p>
+                </div>
+                <div style="position: relative; height: 400px; width: 100%;">
+                    <canvas id="chartProdutos"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>window.EVOLUCAO_DADOS = @Html.Raw(Model.DadosJson);</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@@2.0.0"></script>
+    <script src="~/js/evolucao.js" asp-append-version="true"></script>
+}

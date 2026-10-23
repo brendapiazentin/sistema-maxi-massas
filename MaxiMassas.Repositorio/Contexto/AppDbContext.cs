@@ -58,7 +58,9 @@ public class AppDbContext : DbContext
                 t.HasTrigger("TR_Clientes_DataAtualizacao");
             });
             e.HasKey(c => c.Id);
-            e.Property(c => c.DataCadastro).HasDefaultValueSql("GETDATE()");
+            // Horário de Brasília: o RDS/SQL Server roda em UTC, então GETDATE() devolveria 3 h a mais.
+            e.Property(c => c.DataCadastro).HasDefaultValueSql(
+                "CAST(SYSDATETIMEOFFSET() AT TIME ZONE 'E. South America Standard Time' AS datetime2)");
             e.Property(c => c.Nome).IsRequired().HasMaxLength(150);
             e.Property(c => c.Telefone).IsRequired().HasMaxLength(20);
             // CPF: opcional (nullable), max 14 chars (com máscara: 000.000.000-00)
