@@ -93,8 +93,10 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll",
 var app = builder.Build();
 
 // Aplica as migrations e cria o administrador padrão se o banco estiver vazio.
-using (var escopo = app.Services.CreateScope())
+// (Banco:AplicarMigrationsAoIniciar = false desliga isso, por exemplo para subir sem SQL Server.)
+if (builder.Configuration.GetValue("Banco:AplicarMigrationsAoIniciar", true))
 {
+    using var escopo = app.Services.CreateScope();
     var db = escopo.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = escopo.ServiceProvider.GetRequiredService<ILogger<Program>>();
     await DataSeeder.SeedAsync(db, logger);

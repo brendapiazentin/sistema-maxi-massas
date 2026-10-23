@@ -10,6 +10,12 @@ public interface IAutenticacaoNegocio
     /// <summary>Usuário ativo cujo login e senha conferem; null caso contrário.</summary>
     Task<Usuario?> AutenticarUsuarioAsync(string login, string senha);
 
+    /// <summary>
+    /// Usuário cujo login e senha conferem, ativo ou não (a tela de login só avisa que a conta está
+    /// desativada depois de a senha conferir, para não revelar isso a quem chuta senhas); null se não conferem.
+    /// </summary>
+    Task<Usuario?> ConferirSenhaAsync(string login, string senha);
+
     /// <summary>Cliente com conta no app cujo e-mail e senha conferem; null caso contrário.</summary>
     Task<Cliente?> AutenticarClienteAsync(string email, string senha);
 
@@ -27,9 +33,15 @@ public class AutenticacaoNegocio : IAutenticacaoNegocio
 
     public async Task<Usuario?> AutenticarUsuarioAsync(string login, string senha)
     {
-        var usuario = await _usuarios.GetByLoginAsync(login);
+        var usuario = await ConferirSenhaAsync(login, senha);
         // Desativado não entra (continua no banco só por causa do histórico).
-        if (usuario is null || !usuario.Ativo || !BCrypt.Net.BCrypt.Verify(senha, usuario.Senha)) return null;
+        return usuario is { Ativo: true } ? usuario : null;
+    }
+
+    public async Task<Usuario?> ConferirSenhaAsync(string login, string senha)
+    {
+        var usuario = await _usuarios.GetByLoginAsync(login);
+        if (usuario is null || !BCrypt.Net.BCrypt.Verify(senha, usuario.Senha)) return null;
         return usuario;
     }
 
