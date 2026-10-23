@@ -59,7 +59,7 @@ namespace MaxiMassas.Repositorio.Migrations
                     b.Property<DateTime>("DataCadastro")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasDefaultValueSql("CAST(SYSDATETIMEOFFSET() AT TIME ZONE 'E. South America Standard Time' AS datetime2)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(150)
