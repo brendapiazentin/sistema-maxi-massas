@@ -1,107 +1,114 @@
-﻿using Microsoft.AspNetCore.Mvc;
+// Clientes do painel: a lista é montada no servidor e o modal "+ NOVO"/editar grava pelo ClienteNegocio
+// (o mesmo da API), com as mesmas validações do POST/PUT /api/Cliente.
+using FluentValidation;
+using MaxiMassas.Modelos.Dtos.Request;
+using MaxiMassas.Modelos.Dtos.Response;
+using MaxiMassas.Modelos;
 using MaxiMassas.Negocio;
-using MaxiMassas.Modelos.Dtos;
+using MaxiMassas.Web.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace MaxiMassas.Web.Controllers;
 
-// Controller MVC: recebe a requisição, chama o Negocio e devolve uma view.
-// Nenhuma regra de negócio aqui — elas estão em ClienteNegocio.
-public class ClientesController : Controller
+[Route("Clientes")]
+public class ClientesController : PainelController
 {
-    private readonly ClienteNegocio _negocio;
+    /// <summary>Estado da tela (o ViewModel). O nome vazio faz o binding usar os mesmos nomes de campo das Razor Pages.</summary>
+    [BindProperty(Name = "", SupportsGet = true)] public ClientesViewModel Vm { get; set; } = new();
 
-    // INJEÇÃO DE DEPENDÊNCIA: o controller não escreve "new ClienteNegocio(...)".
-    // Ele pede um ClienteNegocio no construtor e o ASP.NET Core entrega pronto,
-    // já com o repositório e o banco montados por dentro. A lista do que o ASP.NET
-    // sabe montar está no Program.cs. Explicação completa: INJECAO-DE-DEPENDENCIA.md.
-    public ClientesController(ClienteNegocio negocio)
+    private readonly IClienteNegocio _clientes;
+
+    private readonly IVendaNegocio _vendas;
+
+    private readonly IValidator<ClienteRequest> _validador;
+
+    private readonly ILogger<ClientesController> _logger;
+
+    public ClientesController(IClienteNegocio clientes, IVendaNegocio vendas, IValidator<ClienteRequest> validador,
+        ILogger<ClientesController> logger)
     {
-        _negocio = negocio;
+        _clientes = clientes;
+        _vendas = vendas;
+        _validador = validador;
+        _logger = logger;
     }
 
-    // GET /Clientes            → lista todos
-    // GET /Clientes?busca=ana  → usa a stored procedure
-    public IActionResult Index(string? busca)
+    private async Task CarregarAsync()
     {
-        var clientes = string.IsNullOrWhiteSpace(busca)
-            ? _negocio.Listar()
-            : _negocio.BuscarPorNome(busca);
+        var clientes = await _clientes.GetAllAsync();
+        // Compras e total gasto: só vendas que valeram (canceladas não contam).
+        var porCliente = (await _vendas.GetAllAsync())
+            .Where(v => v.Status != StatusVenda.Cancelada)
+            .GroupBy(v => v.ClienteId)
+            .ToDictionary(g => g.Key, g => (Compras: g.Count(), Total: g.Sum(v => v.ValorTotal)));
 
-        ViewData["Busca"] = busca;
-        return View(clientes.Select(ClienteDto.De).ToList());
+        Vm.Linhas = clientes
+            .OrderBy(c => c.Nome)
+            .Select(c => porCliente.TryGetValue(c.Id, out var a)
+                ? new ClienteLinha(c, a.Compras, a.Total)
+                : new ClienteLinha(c, 0, 0))
+            .ToList();
     }
 
-    // GET /Clientes/Criar
-    public IActionResult Criar() => View(new ClienteSalvarDto());
+    private static string? Vazio(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
-    // POST /Clientes/Criar
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Criar(ClienteSalvarDto modelo)
+    /// <summary>As mensagens do validador (compartilhado com a API) estão sem acento; aqui ficam legíveis.</summary>
+    private static string TraduzirErro(string mensagem) => mensagem
+        .Replace("e obrigatorio", "é obrigatório")
+        .Replace("invalido", "inválido")
+        .Replace("Numero", "Número")
+        .Replace("numero", "número")
+        .Replace("digitos", "dígitos");
+
+    [HttpGet("")]
+    public async Task<IActionResult> Index()
     {
-        if (!ModelState.IsValid) return View(modelo);
+    await CarregarAsync();
+    return View(Vm);
+    }
 
-        try
+    [HttpPost(""), ActionName("Index")]
+    public async Task<IActionResult> IndexPost()
+    {
+        var request = new ClienteUpdateRequest
         {
-            _negocio.Cadastrar(modelo.ParaCliente());
-            TempData["Mensagem"] = "Cliente cadastrado com sucesso.";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (RegraDeNegocioException ex)
+            // Campo vazio chega como null (padrão do ASP.NET): vira texto vazio e o validador acusa.
+            Nome = (Vm.Cliente.Nome ?? string.Empty).Trim(),
+            Telefone = (Vm.Cliente.Telefone ?? string.Empty).Trim(),
+            CEP = (Vm.Cliente.Cep ?? string.Empty).Trim(),
+            Numero = (Vm.Cliente.Numero ?? string.Empty).Trim(),
+            Complemento = Vazio(Vm.Cliente.Complemento),
+            Observacao = Vazio(Vm.Cliente.Observacao),
+            Logradouro = Vazio(Vm.Cliente.Rua),
+            Bairro = Vazio(Vm.Cliente.Bairro),
+            Cidade = Vazio(Vm.Cliente.Cidade),
+            Estado = Vazio(Vm.Cliente.Uf)?.ToUpper()
+        };
+
+        var validacao = await _validador.ValidateAsync(request);
+        if (!validacao.IsValid)
         {
-            // A mensagem da regra aparece no topo do formulário.
-            ModelState.AddModelError(string.Empty, ex.Message);
-            return View(modelo);
+            Vm.ErrosFormulario = validacao.Errors.Select(e => TraduzirErro(e.ErrorMessage)).Distinct().ToList();
+            await CarregarAsync();
+            return View("Index", Vm);
         }
-    }
 
-    // GET /Clientes/Editar/5
-    public IActionResult Editar(int id)
-    {
-        var cliente = _negocio.ObterPorId(id);
-        if (cliente is null) return NotFound();
-
-        // O DTO de entrada não tem Id; a view usa este valor para montar a URL do formulário.
-        ViewData["Id"] = id;
-        return View(ClienteSalvarDto.De(cliente));
-    }
-
-    // POST /Clientes/Editar/5   (o id vem da URL, os campos vêm do formulário)
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Editar(int id, ClienteSalvarDto modelo)
-    {
-        ViewData["Id"] = id;
-        if (!ModelState.IsValid) return View(modelo);
-
-        try
+        if (Vm.Cliente.Id == 0)
         {
-            _negocio.Atualizar(modelo.ParaCliente(id));
-            TempData["Mensagem"] = "Cliente atualizado.";
-            return RedirectToAction(nameof(Index));
+            var criado = await _clientes.CreateAsync(request);
+            TempData["Mensagem"] = $"Cliente {criado.Nome} cadastrado.";
+            _logger.LogInformation("[Painel] Cliente {Id} cadastrado.", criado.Id);
         }
-        catch (RegraDeNegocioException ex)
+        else
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
-            return View(modelo);
+            var atualizado = await _clientes.UpdateAsync(Vm.Cliente.Id, request);
+            TempData["Mensagem"] = atualizado is null
+                ? "Este cliente não existe mais."
+                : $"Cadastro de {atualizado.Nome} atualizado.";
         }
-    }
-
-    // GET /Clientes/Excluir/5  → tela de confirmação
-    public IActionResult Excluir(int id)
-    {
-        var cliente = _negocio.ObterPorId(id);
-        if (cliente is null) return NotFound();
-        return View(ClienteDto.De(cliente));
-    }
-
-    // POST /Clientes/Excluir/5
-    [HttpPost, ActionName("Excluir")]
-    [ValidateAntiForgeryToken]
-    public IActionResult ConfirmarExclusao(int id)
-    {
-        _negocio.Remover(id);
-        TempData["Mensagem"] = "Cliente excluído.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction("Index");
     }
 }

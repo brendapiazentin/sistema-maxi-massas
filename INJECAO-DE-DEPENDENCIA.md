@@ -5,6 +5,11 @@ configuradas por injeção de dependência no arquivo Program.cs dos projetos We
 e Api"*. Este guia explica o que isso quer dizer, partindo do que você já sabe
 de POO, e mostra exatamente o que escrever quando criar uma entidade nova.
 
+> **Nota sobre o projeto Maxi Massas:** os exemplos usam `Cliente` e `Ingresso` para
+> ilustrar. No sistema real, o bloco completo (repositórios, negócios, serviços,
+> AutoMapper e FluentValidation) está em `MaxiMassas.Web/Program.cs` e
+> `MaxiMassas.Api/Program.cs`, e é idêntico nos dois.
+
 ## 1. O que você já sabe: uma classe que precisa de outra
 
 Em POO você já viu composição: uma classe que *tem* outra como campo. No PIM,

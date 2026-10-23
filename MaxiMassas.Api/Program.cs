@@ -1,73 +1,120 @@
-using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MaxiMassas.Api.Middleware;
+using MaxiMassas.Api.Seguranca;
+using MaxiMassas.Modelos.Validadores;
 using MaxiMassas.Negocio;
+using MaxiMassas.Negocio.Integracoes;
 using MaxiMassas.Repositorio;
 using MaxiMassas.Repositorio.Contexto;
 using MaxiMassas.Repositorio.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// A connection string vem do appsettings.json — nunca do código-fonte.
+// A connection string vem do appsettings.json (ou de User Secrets) — nunca do código-fonte.
 var connectionString = builder.Configuration.GetConnectionString("Padrao")
     ?? throw new InvalidOperationException("Connection string 'Padrao' não encontrada no appsettings.json.");
 
 // ---------- Injeção de dependência ----------
-// Esta é a LISTA DE MONTAGEM do sistema. Cada linha ensina o ASP.NET Core a
-// criar uma peça. Depois, quando um controller pede um ClienteNegocio no
-// construtor, o ASP.NET monta a cadeia inteira sozinho:
-//
-//   ClientesController  pede  ClienteNegocio
-//   ClienteNegocio      pede  IClienteRepositorio  -> recebe um ClienteRepositorio
-//   ClienteRepositorio  pede  AppDbContext         -> recebe com a connection string
-//
-// Ninguém escreve "new" para essas classes. Explicação passo a passo, com os
-// erros mais comuns: INJECAO-DE-DEPENDENCIA.md, na pasta da solution.
+// LISTA DE MONTAGEM do sistema: cada linha ensina o ASP.NET Core a criar uma peça.
+// Cadeia típica: Controller -> *Negocio -> I*Repositorio -> AppDbContext (connection string).
+// Explicação passo a passo: INJECAO-DE-DEPENDENCIA.md, na pasta da solution.
 //
 // ATENÇÃO: este bloco é IGUAL no Program.cs da Web. Mudou aqui, mude lá também.
 
-// 1) O banco: "quando alguém pedir um AppDbContext, crie um usando SQL Server
-//    e esta connection string".
+// 1) O banco
 builder.Services.AddDbContext<AppDbContext>(opcoes => opcoes.UseSqlServer(connectionString));
 
-// 2) O repositório: "quando alguém pedir um IClienteRepositorio (a interface),
-//    entregue um ClienteRepositorio (a classe)".
+// 2) Repositórios (camada Repositorio)
+builder.Services.AddScoped(typeof(IRepositorio<>), typeof(Repositorio<>));
+builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 builder.Services.AddScoped<IClienteRepositorio, ClienteRepositorio>();
+builder.Services.AddScoped<IProdutoRepositorio, ProdutoRepositorio>();
+builder.Services.AddScoped<IVendaRepositorio, VendaRepositorio>();
+builder.Services.AddScoped<IEstoqueRepositorio, EstoqueRepositorio>();
+builder.Services.AddScoped<IConsumoProprioRepositorio, ConsumoProprioRepositorio>();
+builder.Services.AddScoped<IRelatorioRepositorio, RelatorioRepositorio>();
+builder.Services.AddScoped<IRedefinicaoSenhaRepositorio, RedefinicaoSenhaRepositorio>();
+builder.Services.AddScoped<IBackupRepositorio, BackupRepositorio>();
+builder.Services.AddScoped<IUnidadeDeTrabalho, UnidadeDeTrabalho>();
 
-// 3) O negócio: "quando alguém pedir um ClienteNegocio, crie um".
-builder.Services.AddScoped<ClienteNegocio>();
+// 3) Classes de negócio (camada Negocio)
+builder.Services.AddScoped<IUsuarioNegocio, UsuarioNegocio>();
+builder.Services.AddScoped<IClienteNegocio, ClienteNegocio>();
+builder.Services.AddScoped<IProdutoNegocio, ProdutoNegocio>();
+builder.Services.AddScoped<IEstoqueNegocio, EstoqueNegocio>();
+builder.Services.AddScoped<IVendaNegocio, VendaNegocio>();
+builder.Services.AddScoped<IVariacaoProdutoNegocio, VariacaoProdutoNegocio>();
+builder.Services.AddScoped<IConsumoProprioNegocio, ConsumoProprioNegocio>();
+builder.Services.AddScoped<IRelatorioNegocio, RelatorioNegocio>();
+builder.Services.AddScoped<IExportacaoNegocio, ExportacaoNegocio>();
+builder.Services.AddScoped<IAuthNegocio, AuthNegocio>();
+builder.Services.AddScoped<IAutenticacaoNegocio, AutenticacaoNegocio>();
+builder.Services.AddScoped<IAppClienteNegocio, AppClienteNegocio>();
+builder.Services.AddScoped<IConfiguracaoEntregaNegocio, ConfiguracaoEntregaNegocio>();
 
-// AddScoped = um objeto novo para cada requisição (cada clique na Web, cada chamada
-// da API), jogado fora quando a resposta sai. O AddDbContext funciona do mesmo jeito:
-// cada requisição ganha o seu contexto, e a conexão é fechada quando ele é descartado.
+// 4) Serviços de apoio (e-mail, foto, ViaCEP)
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IFotoPerfilService, FotoPerfilService>();
+builder.Services.AddScoped<IViaCepService, ViaCepService>();
+var viacepTimeout = builder.Configuration.GetValue<int>("ViaCep:TimeoutSeconds", 10);
+builder.Services.AddHttpClient("ViaCep", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ViaCep:BaseUrl"]!);
+    client.Timeout = TimeSpan.FromSeconds(viacepTimeout);
+});
 
-// Cada entidade nova ganha duas linhas aqui, uma de repositório e uma de negócio:
-// builder.Services.AddScoped<IIngressoRepositorio, IngressoRepositorio>();
-// builder.Services.AddScoped<IngressoNegocio>();
+// 5) AutoMapper e validações (FluentValidation)
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<ClienteRequestValidator>();
 // --------------------------------------------
 
-builder.Services.AddControllers();
+// Autenticação: Basic Auth para usuários internos e esquema próprio para clientes do app (/api/app).
+builder.Services.AddAuthentication(BasicAuthHandler.SchemeName)
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>(BasicAuthHandler.SchemeName, null)
+    .AddScheme<AuthenticationSchemeOptions, ClienteAuthHandler>(ClienteAuthHandler.SchemeName, null);
+builder.Services.AddAuthorization();
 
-// OpenAPI: gera a documentação da API (quais endpoints existem, o que cada um
-// recebe e devolve) num arquivo JSON padrão, em /openapi/v1.json.
-// É esse documento que o grupo usa para mostrar ao app Flutter o que a API oferece.
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(
+        new System.Text.Json.Serialization.JsonStringEnumConverter()));
+
+// OpenAPI: documento JSON padrão em /openapi/v1.json — é o que o grupo mostra ao app Flutter.
 builder.Services.AddOpenApi();
+
+// CORS liberado para desenvolvimento; restringir as origens em produção.
+builder.Services.AddCors(o => o.AddPolicy("AllowAll",
+    p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
 var app = builder.Build();
 
+// Aplica as migrations e cria o administrador padrão se o banco estiver vazio.
+// (Banco:AplicarMigrationsAoIniciar = false desliga isso, por exemplo para subir sem SQL Server.)
+if (builder.Configuration.GetValue("Banco:AplicarMigrationsAoIniciar", true))
+{
+    using var escopo = app.Services.CreateScope();
+    var db = escopo.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = escopo.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    await DataSeeder.SeedAsync(db, logger);
+}
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
-    // Publica o documento só durante o desenvolvimento.
     app.MapOpenApi();
-
-    // Scalar: tela gráfica que lê o documento OpenAPI acima e permite ver e
-    // testar cada endpoint pelo navegador, em /scalar.
+    // Scalar: tela gráfica para ver e testar cada endpoint, em /scalar.
     app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

@@ -1,88 +1,139 @@
+using AutoMapper;
+using MaxiMassas.Modelos.Dtos.Request;
+using MaxiMassas.Modelos.Dtos.Response;
+using MaxiMassas.Negocio.Integracoes;
 using MaxiMassas.Modelos;
 using MaxiMassas.Repositorio.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace MaxiMassas.Negocio;
 
-// Aqui moram as regras de negócio do cliente.
-// Web e Api chamam esta classe; esta classe chama o repositório.
-// Nenhuma regra fica no controller nem na view.
-public class ClienteNegocio
+public class ClienteNegocio : IClienteNegocio
 {
-    private readonly IClienteRepositorio _repositorio;
+    private readonly IClienteRepositorio _repo;
+    private readonly IViaCepService _viacep;
+    private readonly IMapper _mapper;
+    private readonly ILogger<ClienteNegocio> _logger;
 
-    // INJEÇÃO DE DEPENDÊNCIA: esta classe precisa de um repositório para trabalhar,
-    // mas não cria um com "new". Ela PEDE no construtor, e o ASP.NET Core entrega.
-    // Quem diz ao ASP.NET qual classe entregar quando alguém pede IClienteRepositorio
-    // é a linha AddScoped<IClienteRepositorio, ClienteRepositorio>() do Program.cs.
-    // Explicação completa: INJECAO-DE-DEPENDENCIA.md, na pasta da solution.
-    public ClienteNegocio(IClienteRepositorio repositorio)
+    public ClienteNegocio(
+        IClienteRepositorio repo,
+        IViaCepService viacep,
+        IMapper mapper,
+        ILogger<ClienteNegocio> logger)
     {
-        _repositorio = repositorio;
+        _repo = repo;
+        _viacep = viacep;
+        _mapper = mapper;
+        _logger = logger;
     }
 
-    public List<Cliente> Listar() => _repositorio.Listar();
+    public async Task<IEnumerable<ClienteResponse>> GetAllAsync()
+        => _mapper.Map<IEnumerable<ClienteResponse>>(await _repo.GetAllAsync());
 
-    public Cliente? ObterPorId(int id) => _repositorio.ObterPorId(id);
-
-    public List<Cliente> BuscarPorNome(string trecho) =>
-        _repositorio.BuscarPorNome(trecho?.Trim() ?? string.Empty);
-
-    public Cliente Cadastrar(Cliente cliente)
+    public async Task<ClienteResponse?> GetByIdAsync(int id)
     {
-        Normalizar(cliente);
-        Validar(cliente, ignorarId: null);
+        var cliente = await _repo.GetByIdAsync(id);
 
-        cliente.Ativo = true;
-        _repositorio.Adicionar(cliente);
-        return cliente;
+        return cliente is null
+            ? null
+            : _mapper.Map<ClienteResponse>(cliente);
     }
 
-    public void Atualizar(Cliente cliente)
+    public async Task<ClienteResponse> CreateAsync(ClienteRequest request)
     {
-        var existente = _repositorio.ObterPorId(cliente.Id)
-            ?? throw new RegraDeNegocioException("Cliente não encontrado.");
+        var cliente = _mapper.Map<Cliente>(request);
 
-        Normalizar(cliente);
-        Validar(cliente, ignorarId: cliente.Id);
+        // Remove mascara do telefone
+        cliente.Telefone = Regex.Replace(request.Telefone, @"\D", "");
 
-        // Copia só o que pode mudar; DataCadastro continua a original.
-        existente.Nome = cliente.Nome;
-        existente.Email = cliente.Email;
-        existente.Cpf = cliente.Cpf;
-        existente.Ativo = cliente.Ativo;
+        // Remove mascara do CEP
+        cliente.CEP = Regex.Replace(request.CEP, @"\D", "");
 
-        _repositorio.Atualizar(existente);
+        await PreencherEnderecoAsync(cliente, request, consultarCep: true);
+
+        await _repo.AddAsync(cliente);
+        await _repo.SaveChangesAsync();
+
+        return _mapper.Map<ClienteResponse>(cliente);
     }
 
-    // Devolve false quando o cliente não existe.
-    public bool Remover(int id)
+    public async Task<ClienteResponse?> UpdateAsync(int id, ClienteUpdateRequest request)
     {
-        var cliente = _repositorio.ObterPorId(id);
-        if (cliente is null) return false;
+        var cliente = await _repo.GetByIdAsync(id);
 
-        _repositorio.Remover(cliente);
-        return true;
+        if (cliente is null)
+            return null;
+
+        cliente.Nome = request.Nome;
+
+        cliente.Telefone = Regex.Replace(request.Telefone, @"\D", "");
+
+        cliente.Numero = request.Numero;
+
+        cliente.Complemento = request.Complemento;
+
+        cliente.Observacao = request.Observacao;
+
+        if (request.Cpf is not null)
+            cliente.Cpf = request.Cpf;
+
+        var novoCep = Regex.Replace(request.CEP, @"\D", "");
+        var cepMudou = cliente.CEP != novoCep;
+        cliente.CEP = novoCep;
+
+        // CEP novo: busca o endereço dele (o que foi digitado continua valendo)
+        await PreencherEnderecoAsync(cliente, request, consultarCep: cepMudou);
+
+        _repo.Update(cliente);
+
+        await _repo.SaveChangesAsync();
+
+        return _mapper.Map<ClienteResponse>(cliente);
     }
 
-    // ---------- regras ----------
-
-    private static void Normalizar(Cliente cliente)
+    /// <summary>
+    /// Rua, bairro, cidade e UF: vale o que foi digitado; o que vier vazio sai do ViaCEP
+    /// (quando [consultarCep]) ou fica como estava. Se o ViaCEP não achar o CEP, o
+    /// endereço digitado é gravado do mesmo jeito (antes o endereço ficava em branco).
+    /// </summary>
+    private async Task PreencherEnderecoAsync(Cliente cliente, ClienteRequest request, bool consultarCep)
     {
-        cliente.Nome = cliente.Nome.Trim();
-        cliente.Email = cliente.Email.Trim().ToLowerInvariant();
-        // Guarda só os dígitos: "123.456.789-09" vira "12345678909".
-        cliente.Cpf = new string(cliente.Cpf.Where(char.IsDigit).ToArray());
+        static string? Texto(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+        var faltaAlgo = Texto(request.Logradouro) is null || Texto(request.Bairro) is null
+                        || Texto(request.Cidade) is null || Texto(request.Estado) is null;
+        var viaCep = consultarCep && faltaAlgo ? await _viacep.BuscarEnderecoPorCepAsync(cliente.CEP) : null;
+
+        if (consultarCep && faltaAlgo)
+        {
+            if (viaCep is not null)
+                _logger.LogInformation("Endereco completado via ViaCEP para o CEP {CEP}.", cliente.CEP);
+            else
+                _logger.LogWarning("ViaCEP nao retornou endereco para o CEP {CEP}.", cliente.CEP);
+        }
+
+        cliente.Logradouro = Texto(request.Logradouro) ?? Texto(viaCep?.Logradouro) ?? Texto(cliente.Logradouro) ?? string.Empty;
+        cliente.Bairro = Texto(request.Bairro) ?? Texto(viaCep?.Bairro) ?? Texto(cliente.Bairro) ?? string.Empty;
+        cliente.Cidade = Texto(request.Cidade) ?? Texto(viaCep?.Localidade) ?? Texto(cliente.Cidade) ?? string.Empty;
+        cliente.Estado = (Texto(request.Estado) ?? Texto(viaCep?.UF) ?? Texto(cliente.Estado) ?? string.Empty).ToUpper();
     }
 
-    private void Validar(Cliente cliente, int? ignorarId)
+    public async Task<bool> DeleteAsync(int id)
     {
-        if (cliente.Cpf.Length != 11)
-            throw new RegraDeNegocioException("O CPF precisa ter 11 dígitos.");
+        var cliente = await _repo.GetByIdAsync(id);
 
-        if (_repositorio.EmailEmUso(cliente.Email, ignorarId))
-            throw new RegraDeNegocioException("Já existe um cliente com este e-mail.");
+        if (cliente is null)
+            return false;
 
-        if (_repositorio.CpfEmUso(cliente.Cpf, ignorarId))
-            throw new RegraDeNegocioException("Já existe um cliente com este CPF.");
+        _repo.Remove(cliente);
+
+        return await _repo.SaveChangesAsync();
+    }
+
+    public async Task<EnderecoDto?> BuscarEnderecoPorCepAsync(string cep)
+    {
+        cep = Regex.Replace(cep, @"\D", "");
+
+        return await _viacep.BuscarEnderecoPorCepAsync(cep);
     }
 }
