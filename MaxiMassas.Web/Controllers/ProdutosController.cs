@@ -93,6 +93,7 @@ public class ProdutosController : PainelController
             Custo = custo ?? 0,
             PrecoVenda = preco ?? 0,
             Tipo = tipo,
+            Ativo = Vm.Produto.Ativo,
             MotivoAlteracao = "Alterado no painel"
         };
         if (erros.Count == 0)

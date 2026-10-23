@@ -24,6 +24,8 @@ public class ProdutoForm
     /// <summary>Nome do enum TipoProduto (ex.: "Massa").</summary>
     public string? Tipo { get; set; }
     public string? Observacao { get; set; }
+    /// <summary>Inativo = produto retirado do cardapio do app.</summary>
+    public bool Ativo { get; set; } = true;
 }
 
 public class ProdutosViewModel

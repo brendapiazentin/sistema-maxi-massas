@@ -58,7 +58,7 @@
                         var p = Model.Produtos[i];
                         <tr>
                             <td class="col-num">@(i + 1)</td>
-                            <td class="col-prod">@p.Nome</td>
+                            <td class="col-prod">@p.Nome @if (!p.Ativo) { <span class="badge bg-secondary ms-2">Inativo</span> }</td>
                             <td>@(string.IsNullOrEmpty(p.Sabor) ? "—" : p.Sabor)</td>
                             <td>@PainelFormatos.Peso(p.Peso)</td>
                             <td>@PainelFormatos.RotuloTipo(p.Tipo)</td>
@@ -94,7 +94,7 @@
             {
                 <div class="card-produto">
                     <div class="card-prod-left">
-                        <span class="m-prod">@p.Nome</span>
+                        <span class="m-prod">@p.Nome @if (!p.Ativo) { <span class="badge bg-secondary ms-1">Inativo</span> }</span>
                         <span class="m-sabor">@(string.IsNullOrEmpty(p.Sabor) ? "—" : p.Sabor)</span>
                         <span class="m-peso-tipo">@PainelFormatos.Peso(p.Peso) • @PainelFormatos.RotuloTipo(p.Tipo)</span>
                     </div>
@@ -183,6 +183,15 @@
                             </div>
 
                             <!-- 6ª Linha: Observações -->
+                            <!-- Situacao do produto: Ativo / Inativo -->
+                            <div class="col-12 p-0">
+                                <label class="form-label-custom" for="inputAtivo">Situa&ccedil;&atilde;o</label>
+                                <select class="form-control form-control-custom w-100 form-select" id="inputAtivo" name="Produto.Ativo">
+                                    <option value="true" selected="@Model.Produto.Ativo">Ativo (aparece no app)</option>
+                                    <option value="false" selected="@(!Model.Produto.Ativo)">Inativo (oculto no app)</option>
+                                </select>
+                            </div>
+
                             <div class="col-12 p-0 mt-3 mt-md-0">
                                 <label class="form-label-custom" for="inputObs">Observações</label>
                                 <input type="text" class="form-control form-control-custom w-100" id="inputObs" name="Produto.Observacao" value="@Model.Produto.Observacao" placeholder="Ex: Produto vegano" maxlength="500">
@@ -209,7 +218,7 @@
         return string.Join(" ", A("id", p.Id.ToString()), A("nome", p.Nome), A("sabor", p.Sabor),
             A("peso", PainelFormatos.Peso(p.Peso)), A("custo", PainelFormatos.Moeda(p.Custo)),
             A("preco", PainelFormatos.Moeda(p.PrecoVenda)), A("estoque", (p.Estoque?.Quantidade ?? 0).ToString()),
-            A("tipo", p.Tipo.ToString()), A("obs", p.Observacao));
+            A("tipo", p.Tipo.ToString()), A("obs", p.Observacao), A("ativo", p.Ativo ? "true" : "false"));
     }
 }
 
