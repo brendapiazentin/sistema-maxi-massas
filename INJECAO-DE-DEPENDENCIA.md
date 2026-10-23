@@ -5,6 +5,11 @@ configuradas por injeção de dependência no arquivo Program.cs dos projetos We
 e Api"*. Este guia explica o que isso quer dizer, partindo do que você já sabe
 de POO, e mostra exatamente o que escrever quando criar uma entidade nova.
 
+> **Nota sobre o projeto Maxi Massas:** os exemplos usam `Cliente` e `Ingresso` para
+> ilustrar. No sistema real, o bloco completo (repositórios, negócios, serviços,
+> AutoMapper e FluentValidation) está em `MaxiMassas.Web/Program.cs` e
+> `MaxiMassas.Api/Program.cs`, e é idêntico nos dois.
+
 ## 1. O que você já sabe: uma classe que precisa de outra
 
 Em POO você já viu composição: uma classe que *tem* outra como campo. No PIM,
@@ -16,7 +21,7 @@ cada camada precisa da camada de baixo para trabalhar:
 - o `AppDbContext` precisa da connection string para saber qual banco abrir.
 
 Cada uma dessas classes recebe a outra **no construtor**. Abra
-`NomeDoSistema.Negocio\ClienteNegocio.cs` e veja:
+`MaxiMassas.Negocio\ClienteNegocio.cs` e veja:
 
 ```csharp
 public ClienteNegocio(IClienteRepositorio repositorio)
@@ -38,7 +43,7 @@ na mão, com `new`, de baixo para cima:
 public IActionResult Index()
 {
     var opcoes = new DbContextOptionsBuilder<AppDbContext>()
-        .UseSqlServer("Server=localhost;Database=NomeDoSistema;Trusted_Connection=True;TrustServerCertificate=True")
+        .UseSqlServer("Server=localhost;Database=MaxiMassas;Trusted_Connection=True;TrustServerCertificate=True")
         .Options;
     var contexto    = new AppDbContext(opcoes);
     var repositorio = new ClienteRepositorio(contexto);
@@ -155,7 +160,7 @@ Sempre que criar uma entidade nova, os construtores seguem o mesmo molde do
 Cliente:
 
 ```csharp
-// NomeDoSistema.Repositorio\IngressoRepositorio.cs
+// MaxiMassas.Repositorio\IngressoRepositorio.cs
 public class IngressoRepositorio : IIngressoRepositorio
 {
     private readonly AppDbContext _contexto;
@@ -167,7 +172,7 @@ public class IngressoRepositorio : IIngressoRepositorio
     ...
 }
 
-// NomeDoSistema.Negocio\IngressoNegocio.cs
+// MaxiMassas.Negocio\IngressoNegocio.cs
 public class IngressoNegocio
 {
     private readonly IIngressoRepositorio _repositorio;
@@ -179,7 +184,7 @@ public class IngressoNegocio
     ...
 }
 
-// NomeDoSistema.Web\Controllers\IngressosController.cs  (e o mesmo na Api)
+// MaxiMassas.Web\Controllers\IngressosController.cs  (e o mesmo na Api)
 public class IngressosController : Controller
 {
     private readonly IngressoNegocio _negocio;
@@ -221,8 +226,8 @@ O sistema sobe, mas a tela ou o endpoint devolve erro 500 com:
 
 ```
 InvalidOperationException: Unable to resolve service for type
-'NomeDoSistema.Negocio.ClienteNegocio' while attempting to activate
-'NomeDoSistema.Api.Controllers.ClientesController'.
+'MaxiMassas.Negocio.ClienteNegocio' while attempting to activate
+'MaxiMassas.Api.Controllers.ClientesController'.
 ```
 
 Leia assim: *"não consegui criar o ClientesController, porque ele pediu um
@@ -235,8 +240,8 @@ chega a subir: o `dotnet run` ou o F5 para na hora com:
 
 ```
 System.AggregateException: Some services are not able to be constructed
-(... Unable to resolve service for type 'NomeDoSistema.Repositorio.Interfaces.IClienteRepositorio'
-while attempting to activate 'NomeDoSistema.Negocio.ClienteNegocio'.)
+(... Unable to resolve service for type 'MaxiMassas.Repositorio.Interfaces.IClienteRepositorio'
+while attempting to activate 'MaxiMassas.Negocio.ClienteNegocio'.)
 ```
 
 O ASP.NET confere a lista ao iniciar e percebe que o negócio pede algo que não

@@ -1,0 +1,13 @@
+@MaxiMassas.Api_HostAddress = http://localhost:5218
+
+### Usuário autenticado (Basic Auth: admin:admin123 em base64)
+GET {{MaxiMassas.Api_HostAddress}}/api/auth/me
+Authorization: Basic YWRtaW46YWRtaW4xMjM=
+
+### Lista de clientes
+GET {{MaxiMassas.Api_HostAddress}}/api/cliente
+Authorization: Basic YWRtaW46YWRtaW4xMjM=
+
+### Produtos do cardápio (app do cliente; Basic com e-mail:senha do cliente)
+GET {{MaxiMassas.Api_HostAddress}}/api/app/produtos
+Authorization: Basic Y2xpZW50ZUBleGVtcGxvLmNvbTpTZW5oYUBGb3J0ZTEyMw==
