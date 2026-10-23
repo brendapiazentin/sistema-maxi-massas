@@ -516,6 +516,9 @@ namespace MaxiMassas.Repositorio.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("Custo")
                         .HasColumnType("decimal(10,2)");
 

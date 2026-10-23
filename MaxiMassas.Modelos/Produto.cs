@@ -14,6 +14,8 @@ public class Produto
     public decimal Peso { get; set; }
     public decimal PrecoVenda { get; set; }
     public decimal Custo { get; set; }
+    /// <summary>Inativo = produto retirado do cardápio do app (diferente de "Em falta", que é estoque zerado).</summary>
+    public bool Ativo {get; set; } = true;
     public TipoProduto Tipo { get; set; }
     public ICollection<VariacaoProduto> VariacoesProduto { get; set; } = new List<VariacaoProduto>();
     public ICollection<HistoricoPreco> HistoricoPreco { get; set; } = new List<HistoricoPreco>();

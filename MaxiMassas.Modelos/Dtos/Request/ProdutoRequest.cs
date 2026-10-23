@@ -11,6 +11,7 @@ public class ProdutoRequest
     public decimal PrecoVenda { get; set; }
     public decimal Custo { get; set; }
     public TipoProduto Tipo { get; set; }
+    public bool Ativo { get; set; } = true;
 }
 
 /// <summary>Mesmos campos (e mesmas validações) do cadastro, mais o motivo da mudança de preço.</summary>

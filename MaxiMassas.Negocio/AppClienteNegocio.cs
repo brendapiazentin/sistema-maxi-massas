@@ -193,6 +193,7 @@ public class AppClienteNegocio : IAppClienteNegocio
     {
         var produtos = await _produtoRepo.GetAllComEstoqueAsync();
         return produtos
+            .Where(p => p.Ativo)
             .OrderBy(p => p.Tipo).ThenBy(p => p.Nome)
             .Select(p => new ProdutoAppResponse
             {
@@ -217,6 +218,15 @@ public class AppClienteNegocio : IAppClienteNegocio
             .GroupBy(i => i.ProdutoId)
             .Select(g => new ItemVendaRequest { ProdutoId = g.Key, Quantidade = g.Sum(i => i.Quantidade) })
             .ToList();
+
+        // Produto inativo some do cardápio; se o app ainda tiver um em cache, o pedido é recusado.
+        foreach (var item in itens)
+        {
+            var produto = await _produtoRepo.GetByIdAsync(item.ProdutoId)
+                ?? throw new KeyNotFoundException($"Produto ID {item.ProdutoId} nao encontrado.");
+            if (!produto.Ativo)
+                throw new RegraDeNegocioException($"O produto \"{produto.NomeCompleto}\" não está mais disponível.");
+        }
 
         var entrega = request.TipoEntrega == TipoEntrega.Entrega;
         var taxa = entrega ? (await _configEntrega.ObterAsync()).CalcularTaxa(await SubtotalAsync(itens)) : 0m;

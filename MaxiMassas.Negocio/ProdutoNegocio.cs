@@ -76,6 +76,7 @@ public class ProdutoNegocio : IProdutoNegocio
         produto.PrecoVenda = request.PrecoVenda;
         produto.Custo = request.Custo;
         produto.Tipo = request.Tipo;
+        produto.Ativo = request.Ativo;
 
         _repo.Update(produto);
         await _repo.SaveChangesAsync();

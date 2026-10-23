@@ -730,7 +730,7 @@ function configurarModalProduto() {
 
     const campos = {
         id: 'inputId', nome: 'inputNome', sabor: 'inputSabor', peso: 'inputPeso', custo: 'inputCusto',
-        preco: 'inputPreco', estoque: 'inputEstoque', tipo: 'inputTipo', obs: 'inputObs'
+        preco: 'inputPreco', estoque: 'inputEstoque', tipo: 'inputTipo', obs: 'inputObs', ativo: 'inputAtivo'
     };
 
     modalProdutoElement.addEventListener('show.bs.modal', function (event) {
@@ -739,7 +739,7 @@ function configurarModalProduto() {
         if (!botaoClicado) return;
 
         const editando = botaoClicado.classList.contains('btn-editar-produto');
-        const dados = editando ? botaoClicado.dataset : { id: '0' };
+        const dados = editando ? botaoClicado.dataset : { id: '0', ativo: 'true' };
 
         Object.entries(campos).forEach(([chave, id]) => { document.getElementById(id).value = dados[chave] || ''; });
         const estoque = document.getElementById('inputEstoque');

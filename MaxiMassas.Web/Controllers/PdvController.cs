@@ -108,7 +108,7 @@ public abstract class PdvController : PainelController
     protected async Task CarregarDadosAsync(object? estado, string modo, int? vendaId = null)
     {
         var clientes = await Clientes.GetAllAsync();
-        var produtos = await Produtos.GetAllAsync();
+        var produtos = (await Produtos.GetAllAsync()).Where(p => p.Ativo || modo == "edicao");
         var regra = await ConfigEntrega.ObterAsync();
 
         var dados = new
