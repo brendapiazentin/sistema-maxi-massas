@@ -16,6 +16,8 @@ public class Produto
     public decimal Custo { get; set; }
     /// <summary>Inativo = produto retirado do cardápio do app (diferente de "Em falta", que é estoque zerado).</summary>
     public bool Ativo {get; set; } = true;
+    /// <summary>Versao da foto (data do ultimo envio). Nulo = sem foto; a imagem fica no S3.</summary>
+    public DateTime? FotoAtualizadaEm { get; set; }
     public TipoProduto Tipo { get; set; }
     public ICollection<VariacaoProduto> VariacoesProduto { get; set; } = new List<VariacaoProduto>();
     public ICollection<HistoricoPreco> HistoricoPreco { get; set; } = new List<HistoricoPreco>();

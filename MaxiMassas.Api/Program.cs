@@ -59,6 +59,7 @@ builder.Services.AddScoped<IConfiguracaoEntregaNegocio, ConfiguracaoEntregaNegoc
 // 4) Serviços de apoio (e-mail, foto, ViaCEP)
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IFotoPerfilService, FotoPerfilService>();
+builder.Services.AddSingleton<IFotoProdutoService, FotoProdutoService>();
 builder.Services.AddScoped<IViaCepService, ViaCepService>();
 var viacepTimeout = builder.Configuration.GetValue<int>("ViaCep:TimeoutSeconds", 10);
 builder.Services.AddHttpClient("ViaCep", client =>

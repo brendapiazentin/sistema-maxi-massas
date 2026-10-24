@@ -742,6 +742,8 @@ function configurarModalProduto() {
         const dados = editando ? botaoClicado.dataset : { id: '0', ativo: 'true' };
 
         Object.entries(campos).forEach(([chave, id]) => { document.getElementById(id).value = dados[chave] || ''; });
+        const campoFoto = document.getElementById('inputFoto'); if (campoFoto) campoFoto.value = '';
+        const campoRemover = document.getElementById('inputRemoverFoto'); if (campoRemover) campoRemover.checked = false;
         const estoque = document.getElementById('inputEstoque');
         estoque.readOnly = editando;
         estoque.required = !editando;

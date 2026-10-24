@@ -33,14 +33,16 @@ public class ProdutosController : PainelController
     private readonly IValidator<ProdutoRequest> _validador;
 
     private readonly ILogger<ProdutosController> _logger;
+    private readonly IFotoProdutoService _fotos;
 
     public ProdutosController(IProdutoNegocio produtos, IEstoqueNegocio estoque, IValidator<ProdutoRequest> validador,
-        ILogger<ProdutosController> logger)
+        ILogger<ProdutosController> logger, IFotoProdutoService fotos)
     {
         _produtos = produtos;
         _estoque = estoque;
         _validador = validador;
         _logger = logger;
+        _fotos = fotos;
     }
 
     private async Task CarregarAsync()
@@ -48,6 +50,21 @@ public class ProdutosController : PainelController
         Vm.Produtos = (await _produtos.GetAllAsync())
             .OrderBy(p => p.Nome).ThenBy(p => p.Sabor)
             .ToList();
+    }
+
+    /// <summary>Grava ou remove a foto depois que o produto foi salvo.</summary>
+    private async Task AplicarFotoAsync(int produtoId, byte[]? foto, bool remover)
+    {
+        if (foto is not null)
+        {
+            await _fotos.SalvarAsync(produtoId, foto);
+            await _produtos.DefinirFotoAsync(produtoId, DateTime.Now);
+        }
+        else if (remover)
+        {
+            await _fotos.ExcluirAsync(produtoId);
+            await _produtos.DefinirFotoAsync(produtoId, null);
+        }
     }
 
     private static string Traduzir(string mensagem) => mensagem
@@ -82,6 +99,17 @@ public class ProdutosController : PainelController
         if (preco is null) erros.Add("Informe o preço (ex.: R$ 39,90).");
         if (!Enum.TryParse<TipoProduto>(Vm.Produto.Tipo, out var tipo) || !Enum.IsDefined(tipo)) erros.Add("Escolha o tipo do produto.");
         var novo = Vm.Produto.Id == 0;
+        // Foto (opcional): confere antes de salvar o produto, para o erro aparecer no formulario.
+        byte[]? fotoPronta = null;
+        if (Vm.Produto.Foto is { Length: > 0 } arquivoFoto)
+        {
+            try
+            {
+                using var fluxoFoto = arquivoFoto.OpenReadStream();
+                fotoPronta = await _fotos.PrepararAsync(fluxoFoto, arquivoFoto.Length);
+            }
+            catch (InvalidOperationException ex) { erros.Add(ex.Message); }
+        }
         if (novo && (Vm.Produto.Estoque is null || Vm.Produto.Estoque < 0)) erros.Add("Informe o estoque inicial (0 ou mais).");
 
         var request = new ProdutoUpdateRequest
@@ -121,11 +149,13 @@ public class ProdutosController : PainelController
                 });
             }
             _logger.LogInformation("[Painel] Produto {Id} cadastrado com estoque {Qtd}.", criado.Id, Vm.Produto.Estoque);
+            await AplicarFotoAsync(criado.Id, fotoPronta, false);
             TempData["Mensagem"] = $"Produto {criado.Nome} cadastrado.";
         }
         else
         {
             var atualizado = await _produtos.UpdateAsync(Vm.Produto.Id, request);
+            if (atualizado is not null) await AplicarFotoAsync(atualizado.Id, fotoPronta, Vm.Produto.RemoverFoto);
             TempData["Mensagem"] = atualizado is null ? "Este produto não existe mais." : $"Produto {atualizado.Nome} atualizado.";
         }
         return RedirectToAction("Index");

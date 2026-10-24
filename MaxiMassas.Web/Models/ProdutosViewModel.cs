@@ -26,6 +26,10 @@ public class ProdutoForm
     public string? Observacao { get; set; }
     /// <summary>Inativo = produto retirado do cardapio do app.</summary>
     public bool Ativo { get; set; } = true;
+    /// <summary>Foto nova (opcional): vai para o S3.</summary>
+    public Microsoft.AspNetCore.Http.IFormFile? Foto { get; set; }
+    /// <summary>Marcado = apaga a foto atual (se nenhuma nova for enviada).</summary>
+    public bool RemoverFoto { get; set; }
 }
 
 public class ProdutosViewModel
