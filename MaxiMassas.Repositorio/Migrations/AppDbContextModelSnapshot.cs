@@ -522,6 +522,9 @@ namespace MaxiMassas.Repositorio.Migrations
                     b.Property<decimal>("Custo")
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<DateTime?>("FotoAtualizadaEm")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(150)

@@ -45,6 +45,8 @@ public class ProdutoAppResponse
     public decimal Preco { get; set; }
     public string Categoria { get; set; } = string.Empty;
     public bool Disponivel { get; set; }
+    /// <summary>Caminho da foto no servidor (ex.: /api/app/produtos/3/foto?v=123). Nulo = produto sem foto.</summary>
+    public string? FotoUrl { get; set; }
     /// <summary>Unidades em estoque: o app não deixa colocar mais do que isso no carrinho.</summary>
     public int Estoque { get; set; }
 }

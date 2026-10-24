@@ -204,7 +204,8 @@ public class AppClienteNegocio : IAppClienteNegocio
                 Preco = p.PrecoVenda,
                 Categoria = CategoriaDoTipo(p.Tipo),
                 Disponivel = (p.Estoque?.Quantidade ?? 0) > 0,
-                Estoque = Math.Max(0, p.Estoque?.Quantidade ?? 0)
+                Estoque = Math.Max(0, p.Estoque?.Quantidade ?? 0),
+                FotoUrl = p.FotoAtualizadaEm is null ? null : $"/api/app/produtos/{p.Id}/foto?v={p.FotoAtualizadaEm.Value.Ticks}"
             });
     }
 

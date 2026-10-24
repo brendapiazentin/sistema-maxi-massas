@@ -83,6 +83,16 @@ public class ProdutoNegocio : IProdutoNegocio
         return _mapper.Map<ProdutoResponse>(produto);
     }
 
+    /// <summary>Marca a versao da foto do produto (nulo = sem foto). A imagem em si e guardada pelo IFotoProdutoService.</summary>
+    public async Task DefinirFotoAsync(int id, DateTime? atualizadaEm)
+    {
+        var produto = await _repo.GetByIdAsync(id);
+        if (produto is null) return;
+        produto.FotoAtualizadaEm = atualizadaEm;
+        _repo.Update(produto);
+        await _repo.SaveChangesAsync();
+    }
+
     public async Task<bool> DeleteAsync(int id)
     {
         var p = await _repo.GetByIdAsync(id);
