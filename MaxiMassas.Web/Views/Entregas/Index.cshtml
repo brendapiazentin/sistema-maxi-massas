@@ -6,6 +6,8 @@
     // Com erro, o modal volta com o que foi digitado; senão, com os valores atuais.
     var minimoNoModal = Model.MinimoDigitado ?? PainelFormatos.Moeda(Model.Taxa.PedidoMinimoEntregaGratis);
     var taxaNoModal = Model.TaxaDigitada ?? PainelFormatos.Moeda(Model.Taxa.TaxaEntrega);
+    var telegram1NoModal = Model.Telegram1Digitado ?? Model.Taxa.TelegramEntregador1;
+    var telegram2NoModal = Model.Telegram2Digitado ?? Model.Taxa.TelegramEntregador2;
 }
 
     <main class="conteudo-pagina flex-grow-1">
@@ -50,7 +52,7 @@
             </div>
 
             <button type="button" class="btn-novo btn-taxa" data-bs-toggle="modal" data-bs-target="#modalTaxa">
-                PEDIDO MÍNIMO E TAXA DE ENTREGA
+                CONFIGURAÇÕES DE ENTREGA
             </button>
         </div>
 
@@ -138,7 +140,7 @@
     </main>
 
     <!-- ========================================== -->
-    <!-- MODAL: PEDIDO MÍNIMO E TAXA DE ENTREGA     -->
+    <!-- MODAL: CONFIGURAÇÕES DE ENTREGA     -->
     <!-- ========================================== -->
     <div class="modal fade" id="modalTaxa" tabindex="-1" aria-hidden="true">
         <!-- mx-auto e max-width: 400px para deixar ele menor e centralizado no desktop -->
@@ -146,7 +148,7 @@
             <div class="modal-content modal-custom-content">
 
                 <div class="modal-header modal-header-custom d-flex justify-content-between align-items-center">
-                    <h5 class="modal-title-custom mb-0">Pedido Mínimo e Taxa de Entrega</h5>
+                    <h5 class="modal-title-custom mb-0">Configurações de Entrega</h5>
                 </div>
 
                 <div class="modal-body p-0 mt-3">
@@ -165,6 +167,18 @@
                             <div class="col-12 p-0 mt-3">
                                 <label class="form-label-custom" for="inputTaxaEntrega">Taxa de entrega (valor fixo)</label>
                                 <input type="text" inputmode="decimal" class="form-control form-control-custom w-100" id="inputTaxaEntrega" name="taxaEntrega" value="@taxaNoModal" placeholder="R$ 4,99" readonly="@(!Model.PodeAlterarTaxa)">
+                            </div>
+
+                            <!-- Telegram dos entregadores (recebem a comanda de cada venda com entrega) -->
+                            <div class="col-12 p-0 mt-3">
+                                <label class="form-label-custom" for="inputTelegram1">Telegram entregador 1</label>
+                                <input type="text" inputmode="numeric" class="form-control form-control-custom w-100" id="inputTelegram1" name="telegramEntregador1" value="@telegram1NoModal" placeholder="Ex.: 123456789" readonly="@(!Model.PodeAlterarTaxa)">
+                            </div>
+
+                            <div class="col-12 p-0 mt-3">
+                                <label class="form-label-custom" for="inputTelegram2">Telegram entregador 2</label>
+                                <input type="text" inputmode="numeric" class="form-control form-control-custom w-100" id="inputTelegram2" name="telegramEntregador2" value="@telegram2NoModal" placeholder="Ex.: 987654321" readonly="@(!Model.PodeAlterarTaxa)">
+                                <small class="text-muted d-block mt-1">Número de identificação do Telegram de cada pessoa que recebe a comanda. Deixe em branco para não enviar.</small>
                             </div>
 
                             <!-- Mensagem de erro do salvamento (ou aviso de quem não pode alterar) -->
