@@ -181,6 +181,15 @@ function acenderBotaoPDV(seletor, valorAtivo) {
     document.querySelectorAll(seletor).forEach(btn => btn.classList.toggle('active', btn.dataset.value === valorAtivo));
 }
 
+// Delivery: preenche data e hora com o momento atual (so se estiverem vazias; o vendedor pode alterar).
+function preencherDataHoraAtualPDV() {
+    const agora = new Date();
+    const dataEl = document.getElementById('dataAgendadaPDV');
+    const horaEl = document.getElementById('horaAgendadaPDV');
+    if (dataEl && !dataEl.value.trim()) dataEl.value = agora.toLocaleDateString('pt-BR');
+    if (horaEl && !horaEl.value.trim()) horaEl.value = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
 function configurarBotoesTogglePDV() {
     // 1. Tipo de Entrega
     const btnEntregas = document.querySelectorAll('.btn-tipo-entrega');
@@ -193,6 +202,7 @@ function configurarBotoesTogglePDV() {
 
             estadoVenda.tipoEntrega = btn.dataset.value;
             blocoEndereco.classList.toggle('d-none', estadoVenda.tipoEntrega !== 'Delivery');
+            if (!MODO_EDICAO && estadoVenda.tipoEntrega === 'Delivery') preencherDataHoraAtualPDV();
             atualizarComandaPDV();
         });
     });
