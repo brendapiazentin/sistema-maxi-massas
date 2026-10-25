@@ -12,6 +12,7 @@ using MaxiMassas.Modelos.Dtos.Request;
 using MaxiMassas.Modelos.Dtos.Response;
 using MaxiMassas.Modelos;
 using MaxiMassas.Repositorio.Interfaces;
+using MaxiMassas.Negocio.Integracoes;
 
 namespace MaxiMassas.Negocio;
 
@@ -24,6 +25,7 @@ public class VendaNegocio : IVendaNegocio
     private readonly IMapper _mapper;
     private readonly ILogger<VendaNegocio> _logger;
     private readonly IUnidadeDeTrabalho _uow;
+    private readonly ITelegramComandaService _telegram;
 
     public VendaNegocio(
         IVendaRepositorio vendaRepo,
@@ -32,7 +34,8 @@ public class VendaNegocio : IVendaNegocio
         IRepositorio<MovimentacaoEstoque> movRepo,
         IMapper mapper,
         ILogger<VendaNegocio> logger,
-        IUnidadeDeTrabalho uow)
+        IUnidadeDeTrabalho uow,
+        ITelegramComandaService telegram)
     {
         _vendaRepo = vendaRepo;
         _produtoRepo = produtoRepo;
@@ -41,6 +44,7 @@ public class VendaNegocio : IVendaNegocio
         _mapper = mapper;
         _logger = logger;
         _uow = uow;
+        _telegram = telegram;
     }
 
     public async Task<IEnumerable<VendaResponse>> GetAllAsync()
@@ -186,6 +190,9 @@ public class VendaNegocio : IVendaNegocio
         }
 
         var salva = await _vendaRepo.GetVendaComDetalhesAsync(venda.Id);
+        // Delivery: manda a comanda ao Telegram dos entregadores (falha no envio nunca derruba a venda).
+        if (salva is { Entrega.TipoEntrega: TipoEntrega.Entrega })
+            await _telegram.EnviarComandaAsync(salva);
         return _mapper.Map<VendaResponse>(salva!);
     }
 

@@ -61,6 +61,14 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IFotoPerfilService, FotoPerfilService>();
 builder.Services.AddSingleton<IFotoProdutoService, FotoProdutoService>();
 builder.Services.AddScoped<IViaCepService, ViaCepService>();
+builder.Services.AddScoped<ITelegramComandaService, TelegramComandaService>();
+builder.Services.AddHttpClient("Telegram", client =>
+{
+    client.BaseAddress = new Uri("https://api.telegram.org/");
+    client.Timeout = TimeSpan.FromSeconds(8);
+});
+// A URL da API do Telegram contem o token do bot: o HttpClient nao pode registra-la nos logs.
+builder.Logging.AddFilter("System.Net.Http.HttpClient.Telegram", LogLevel.None);
 var viacepTimeout = builder.Configuration.GetValue<int>("ViaCep:TimeoutSeconds", 10);
 builder.Services.AddHttpClient("ViaCep", client =>
 {
