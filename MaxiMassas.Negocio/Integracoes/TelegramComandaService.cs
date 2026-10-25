@@ -93,7 +93,7 @@ public class TelegramComandaService : ITelegramComandaService
             };
 
             var client = _httpClientFactory.CreateClient("Telegram");
-            var resposta = await client.PostAsJsonAsync($"bot{token}/sendMessage", payload);
+            var resposta = await client.PostAsJsonAsync($"/bot{token}/sendMessage", payload);
             if (resposta.IsSuccessStatusCode)
             {
                 _logger.LogInformation("[Telegram] Comanda da venda #{VendaId} enviada (chat {ChatId}).", vendaId, chatId);
