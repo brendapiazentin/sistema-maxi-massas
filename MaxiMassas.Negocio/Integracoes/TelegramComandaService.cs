@@ -144,31 +144,31 @@ public class TelegramComandaService : ITelegramComandaService
 
         var linhas = new List<string>
         {
-            $"🛵 <b>NOVA ENTREGA — Pedido #{v.Id}</b>",
+            $"<b>NOVA ENTREGA — Pedido #{v.Id}</b>",
             "",
-            $"👤 <b>Cliente:</b> {H(v.Cliente?.Nome)}",
-            $"📞 <b>Celular:</b> {H(v.Cliente?.Telefone)}"
+            $"<b>Nome:</b> {H(v.Cliente?.Nome)}",
+            $"<b>Celular:</b> {H(v.Cliente?.Telefone)}"
         };
 
         if (!string.IsNullOrWhiteSpace(v.Entrega?.Horario))
-            linhas.Add($"🕒 <b>Horário:</b> {H(v.Entrega!.Horario)}");
+            linhas.Add($"<b>Horário:</b> {H(v.Entrega!.Horario)}");
 
-        linhas.Add($"📍 <b>Endereço:</b> {H(endereco)}");
+        linhas.Add($"<b>Endereço:</b> {H(endereco)}");
         linhas.Add("");
-        linhas.Add("🧾 <b>Itens:</b>");
+        linhas.Add("<b>Itens:</b>");
         foreach (var i in v.ItensVenda)
             linhas.Add($"• {i.Quantidade}x {H(i.Produto?.Nome)} — {R(i.Subtotal)}");
 
         linhas.Add("");
-        if (v.Frete > 0) linhas.Add($"🚚 Taxa de entrega: {R(v.Frete)}");
-        else if ((v.Entrega?.ValorEntrega ?? 0) > 0) linhas.Add($"🚚 Taxa de entrega: {R(v.Entrega!.ValorEntrega)}");
-        else linhas.Add("🚚 Entrega grátis");
-        if (v.Desconto > 0) linhas.Add("🏷️ Desconto aplicado");
-        linhas.Add($"💰 <b>Total: {R(v.ValorTotal)}</b>");
+        if (v.Frete > 0) linhas.Add($"Taxa de entrega: {R(v.Frete)}");
+        else if ((v.Entrega?.ValorEntrega ?? 0) > 0) linhas.Add($"Taxa de entrega: {R(v.Entrega!.ValorEntrega)}");
+        else linhas.Add("Entrega grátis");
+        if (v.Desconto > 0) linhas.Add("Desconto aplicado");
+        linhas.Add($"<b>Total: {R(v.ValorTotal)}</b>");
         if (v.Pagamento is not null)
-            linhas.Add($"💳 <b>Pagamento:</b> {NomeForma(v.Pagamento.FormaPagamento)}");
+            linhas.Add($"<b>Pagamento:</b> {NomeForma(v.Pagamento.FormaPagamento)}");
         if (!string.IsNullOrWhiteSpace(v.Observacao))
-            linhas.Add($"📝 <b>Obs.:</b> {H(v.Observacao)}");
+            linhas.Add($"<b>Obs.:</b> {H(v.Observacao)}");
 
         return string.Join("\n", linhas);
     }
