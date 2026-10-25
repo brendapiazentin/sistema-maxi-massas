@@ -28,6 +28,10 @@ public class EntregasViewModel
 
     [BindNever] public string? MinimoDigitado { get; set; }
 
+    [BindNever] public string? Telegram1Digitado { get; set; }
+
+    [BindNever] public string? Telegram2Digitado { get; set; }
+
     [BindNever] public string? ErroTaxa { get; set; }
 
     /// <summary>Mesmos rótulos de antes: Concluído, Cancelado e o resto "Pendente".</summary>

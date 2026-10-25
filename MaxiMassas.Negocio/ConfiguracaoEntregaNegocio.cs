@@ -44,6 +44,8 @@ public class ConfiguracaoEntregaNegocio : IConfiguracaoEntregaNegocio
         var config = await ObterAsync();
         config.TaxaEntrega = request.TaxaEntrega;
         config.PedidoMinimoEntregaGratis = request.PedidoMinimoEntregaGratis;
+        config.TelegramEntregador1 = string.IsNullOrWhiteSpace(request.TelegramEntregador1) ? null : request.TelegramEntregador1.Trim();
+        config.TelegramEntregador2 = string.IsNullOrWhiteSpace(request.TelegramEntregador2) ? null : request.TelegramEntregador2.Trim();
         config.AtualizadoEm = DateTime.Now;
         await _repo.SaveChangesAsync();
 
@@ -56,6 +58,8 @@ public class ConfiguracaoEntregaNegocio : IConfiguracaoEntregaNegocio
     {
         TaxaEntrega = c.TaxaEntrega,
         PedidoMinimoEntregaGratis = c.PedidoMinimoEntregaGratis,
+        TelegramEntregador1 = c.TelegramEntregador1,
+        TelegramEntregador2 = c.TelegramEntregador2,
         AtualizadoEm = c.AtualizadoEm
     };
 }
