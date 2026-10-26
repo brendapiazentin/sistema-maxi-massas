@@ -88,7 +88,9 @@ class ApiClient {
     var mensagem = 'Não foi possível concluir a operação.';
     if (corpo is Map<String, dynamic>) {
       final erros = corpo['errors'];
-      if (erros is List && erros.isNotEmpty) {
+      if (erros is Map && erros.isNotEmpty) {
+        mensagem = erros.values.expand((v) => v is List ? v : [v]).join("\n");
+      } else if (erros is List && erros.isNotEmpty) {
         mensagem = erros.join('\n');
       } else if (corpo['message'] is String && (corpo['message'] as String).isNotEmpty) {
         mensagem = corpo['message'] as String;

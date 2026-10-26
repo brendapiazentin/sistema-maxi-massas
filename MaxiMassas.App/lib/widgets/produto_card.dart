@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../core/config.dart';
 import '../core/formatos.dart';
 import '../models/produto.dart';
+import 'seletor_quantidade.dart';
 
 class ProdutoCard extends StatelessWidget {
-  const ProdutoCard({super.key, required this.produto});
+  const ProdutoCard({super.key, required this.produto, this.mostrarDivisor = true});
 
   final Produto produto;
+  final bool mostrarDivisor;
 
   @override
   Widget build(BuildContext context) {
@@ -15,45 +17,58 @@ class ProdutoCard extends StatelessWidget {
     final tema = Theme.of(context);
     return Opacity(
       opacity: p.disponivel ? 1 : 0.5,
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        clipBehavior: Clip.antiAlias,
-        child: Row(
-          children: [
-            _Foto(url: p.fotoUrl),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(p.nome, style: tema.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    if (p.descricao.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(p.descricao, maxLines: 2, overflow: TextOverflow.ellipsis, style: tema.textTheme.bodySmall),
-                      ),
-                    const SizedBox(height: 8),
-                    Row(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Foto(url: p.fotoUrl),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: _Foto.tamanho,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          reais(p.preco),
-                          style: tema.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: tema.colorScheme.primary,
-                          ),
-                        ),
+                        Text(p.nome,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: tema.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                        if (p.descricao.isNotEmpty)
+                          Text(p.descricao,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: tema.textTheme.bodySmall?.copyWith(color: Colors.black54)),
                         const Spacer(),
-                        if (!p.disponivel)
-                          const Text('Em falta', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              reais(p.preco),
+                              style: tema.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: tema.colorScheme.primary,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (!p.disponivel)
+                              const Text('Em falta',
+                                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 13))
+                            else
+                              SeletorQuantidade(produto: p),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (mostrarDivisor) Divider(height: 1, indent: 16, endIndent: 16, color: Colors.grey.shade300),
+        ],
       ),
     );
   }
@@ -64,30 +79,33 @@ class _Foto extends StatelessWidget {
 
   final String? url;
 
-  static const double _tamanho = 96;
+  static const double tamanho = 72;
 
   @override
   Widget build(BuildContext context) {
     final vazio = Container(
-      width: _tamanho,
-      height: _tamanho,
-      color: Colors.black12,
-      child: const Icon(Icons.restaurant, color: Colors.black38, size: 36),
+      width: tamanho,
+      height: tamanho,
+      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
+      child: Icon(Icons.restaurant, color: Colors.grey.shade500, size: 28),
     );
     if (url == null) return vazio;
-    return Image.network(
-      Config.urlAbsoluta(url!),
-      width: _tamanho,
-      height: _tamanho,
-      fit: BoxFit.cover,
-      errorBuilder: (context, erro, pilha) => vazio,
-      loadingBuilder: (context, filho, progresso) => progresso == null
-          ? filho
-          : const SizedBox(
-              width: _tamanho,
-              height: _tamanho,
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-            ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        Config.urlAbsoluta(url!),
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.cover,
+        errorBuilder: (context, erro, pilha) => vazio,
+        loadingBuilder: (context, filho, progresso) => progresso == null
+            ? filho
+            : const SizedBox(
+                width: tamanho,
+                height: tamanho,
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+      ),
     );
   }
 }
