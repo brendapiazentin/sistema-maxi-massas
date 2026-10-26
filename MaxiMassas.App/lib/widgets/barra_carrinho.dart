@@ -15,6 +15,7 @@ class BarraCarrinho extends StatelessWidget {
     if (carrinho.vazio) return const SizedBox.shrink();
     final falta = carrinho.config?.faltaParaEntregaGratis(carrinho.subtotal);
     return SafeArea(
+      bottom: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         child: Material(

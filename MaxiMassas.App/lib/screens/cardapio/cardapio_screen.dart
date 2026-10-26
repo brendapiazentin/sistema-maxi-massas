@@ -4,9 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/ajuda.dart';
 import '../../core/tema.dart';
 import '../../providers/cardapio_provider.dart';
-import "../../providers/auth_provider.dart";
 import '../../providers/carrinho_provider.dart';
-import '../../widgets/barra_carrinho.dart';
 import '../../widgets/produto_card.dart';
 
 class CardapioScreen extends StatelessWidget {
@@ -36,14 +34,6 @@ class CardapioScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              context.read<CarrinhoProvider>().limpar();
-              context.read<AuthProvider>().sair();
-            },
-            tooltip: "Sair",
-            icon: const Icon(Icons.logout, color: Colors.white),
-          ),
-          IconButton(
             onPressed: () => abrirWhatsAppLoja(context),
             tooltip: 'Precisa de ajuda?',
             icon: const Icon(Icons.help_outline, color: Colors.white),
@@ -51,7 +41,6 @@ class CardapioScreen extends StatelessWidget {
         ],
       ),
       body: _corpo(context, cardapio),
-      bottomNavigationBar: const BarraCarrinho(),
     );
   }
 

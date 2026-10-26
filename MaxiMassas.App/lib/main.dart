@@ -7,7 +7,7 @@ import 'providers/auth_provider.dart';
 import 'providers/cardapio_provider.dart';
 import 'providers/carrinho_provider.dart';
 import 'screens/acesso/login_screen.dart';
-import 'screens/cardapio/cardapio_screen.dart';
+import 'screens/home/home_shell.dart';
 import 'services/auth_service.dart';
 import 'services/entrega_service.dart';
 import 'services/produto_service.dart';
@@ -66,7 +66,7 @@ class _Porteiro extends StatelessWidget {
       case EstadoAuth.deslogado:
         return const LoginScreen();
       case EstadoAuth.logado:
-        return const CardapioScreen();
+        return const HomeShell();
     }
   }
 }
