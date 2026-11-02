@@ -42,6 +42,12 @@ class AuthProvider extends ChangeNotifier {
     await entrar(email, senha);
   }
 
+  /// Troca o cliente pelo perfil devolvido pela API (ex.: depois de salvar um endereço).
+  void atualizarCliente(Cliente cliente) {
+    _cliente = cliente;
+    notifyListeners();
+  }
+
   Future<void> sair() async {
     await _servico.sair();
     _cliente = null;

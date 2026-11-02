@@ -5,6 +5,7 @@ import '../../core/formatos.dart';
 import '../../core/tema.dart';
 import '../../providers/carrinho_provider.dart';
 import '../../widgets/seletor_quantidade.dart';
+import '../finalizar/finalizar_pedido_screen.dart';
 
 void abrirCarrinho(BuildContext context) {
   Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CarrinhoScreen()));
@@ -137,8 +138,8 @@ class _Resumo extends StatelessWidget {
               ],
               const SizedBox(height: 12),
               FilledButton(
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Finalização do pedido: próxima etapa.')),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const FinalizarPedidoScreen()),
                 ),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(52),

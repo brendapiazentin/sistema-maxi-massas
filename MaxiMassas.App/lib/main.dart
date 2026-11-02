@@ -6,10 +6,12 @@ import 'core/tema.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cardapio_provider.dart';
 import 'providers/carrinho_provider.dart';
+import 'providers/pedidos_provider.dart';
 import 'screens/acesso/login_screen.dart';
 import 'screens/home/home_shell.dart';
 import 'services/auth_service.dart';
 import 'services/entrega_service.dart';
+import 'services/pedido_service.dart';
 import 'services/produto_service.dart';
 
 void main() => runApp(const MaxiMassasApp());
@@ -30,6 +32,9 @@ class MaxiMassasApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<CarrinhoProvider>(
           create: (ctx) => CarrinhoProvider(EntregaService(ctx.read<ApiClient>()))..carregarConfigEntrega(),
+        ),
+        ChangeNotifierProvider<PedidosProvider>(
+          create: (ctx) => PedidosProvider(PedidoService(ctx.read<ApiClient>())),
         ),
       ],
       child: MaterialApp(

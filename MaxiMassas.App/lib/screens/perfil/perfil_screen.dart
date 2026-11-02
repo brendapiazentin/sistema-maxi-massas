@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/ajuda.dart';
+import '../../core/api_client.dart';
 import '../../core/tema.dart';
+import '../../models/cliente.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/carrinho_provider.dart';
+import '../../providers/pedidos_provider.dart';
+import '../../services/perfil_service.dart';
+import '../enderecos/endereco_form_screen.dart';
 
 class PerfilScreen extends StatelessWidget {
   const PerfilScreen({super.key});
@@ -12,6 +17,7 @@ class PerfilScreen extends StatelessWidget {
   Future<void> _sair(BuildContext context) async {
     final carrinho = context.read<CarrinhoProvider>();
     final auth = context.read<AuthProvider>();
+    final pedidos = context.read<PedidosProvider>();
     final confirmou = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -29,6 +35,7 @@ class PerfilScreen extends StatelessWidget {
     );
     if (confirmou == true) {
       carrinho.limpar();
+      pedidos.limpar();
       await auth.sair();
     }
   }
@@ -77,6 +84,8 @@ class PerfilScreen extends StatelessWidget {
             ),
           ),
           Divider(height: 1, color: Colors.grey.shade300),
+          const _Enderecos(),
+          Divider(height: 1, color: Colors.grey.shade300),
           ListTile(
             leading: const Icon(Icons.help_outline),
             title: const Text('Precisa de ajuda?'),
@@ -91,6 +100,77 @@ class PerfilScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Endereços salvos: adicionar, tornar principal e remover.
+class _Enderecos extends StatelessWidget {
+  const _Enderecos();
+
+  Future<void> _executar(BuildContext context, Future<Cliente> Function(PerfilService s) acao) async {
+    final auth = context.read<AuthProvider>();
+    final mensageiro = ScaffoldMessenger.of(context);
+    try {
+      final cliente = await acao(PerfilService(context.read<ApiClient>()));
+      auth.atualizarCliente(cliente);
+    } on ApiException catch (e) {
+      mensageiro.showSnackBar(SnackBar(content: Text(e.mensagem)));
+    }
+  }
+
+  Future<void> _remover(BuildContext context, int id) async {
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remover endereço?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: Tema.vinho),
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
+    );
+    if (confirmou == true && context.mounted) await _executar(context, (s) => s.removerEndereco(id));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final enderecos = context.watch<AuthProvider>().cliente?.enderecos ?? const [];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
+          child: Text('Meus endereços', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ),
+        for (final e in enderecos)
+          ListTile(
+            leading: Icon(e.principal ? Icons.home : Icons.location_on_outlined,
+                color: e.principal ? Tema.vinho : null),
+            title: Text(e.linha1),
+            subtitle: Text(e.principal ? '${e.linha2}\nPrincipal' : e.linha2),
+            isThreeLine: e.principal,
+            trailing: PopupMenuButton<String>(
+              onSelected: (op) {
+                if (op == 'principal') _executar(context, (s) => s.definirPrincipal(e.id!));
+                if (op == 'remover') _remover(context, e.id!);
+              },
+              itemBuilder: (_) => [
+                if (!e.principal) const PopupMenuItem(value: 'principal', child: Text('Tornar principal')),
+                const PopupMenuItem(value: 'remover', child: Text('Remover')),
+              ],
+            ),
+          ),
+        ListTile(
+          leading: const Icon(Icons.add, color: Tema.vinho),
+          title: const Text('Adicionar endereço', style: TextStyle(color: Tema.vinho)),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EnderecoFormScreen())),
+        ),
+      ],
     );
   }
 }

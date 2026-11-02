@@ -151,7 +151,7 @@ public class TelegramComandaService : ITelegramComandaService
         };
 
         if (!string.IsNullOrWhiteSpace(v.Entrega?.Horario))
-            linhas.Add($"<b>Horário:</b> {H(v.Entrega!.Horario)}");
+            linhas.Add($"<b>Horário:</b> {v.Entrega!.DataEntrega:dd/MM} às {H(v.Entrega.Horario)}");
 
         linhas.Add($"<b>Endereço:</b> {H(endereco)}");
         linhas.Add("");

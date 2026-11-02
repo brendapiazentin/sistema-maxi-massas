@@ -78,3 +78,14 @@ public class ItemPedidoAppResponse
     public decimal PrecoUnitario { get; set; }
     public decimal Subtotal { get; set; }
 }
+
+/// <summary>Horário que o cliente pode escolher para entrega ou retirada.</summary>
+public class HorarioAppResponse
+{
+    /// <summary>Valor enviado de volta no pedido, ex.: "03/11/2026 18:30".</summary>
+    public string Valor { get; set; } = string.Empty;
+    /// <summary>Rótulo do dia, ex.: "Hoje", "Amanhã", "Qua, 04/11".</summary>
+    public string Dia { get; set; } = string.Empty;
+    /// <summary>Hora para exibir, ex.: "18:30".</summary>
+    public string Hora { get; set; } = string.Empty;
+}
