@@ -55,6 +55,8 @@ public abstract class PdvController : PainelController
     {
         ["Concluído"] = (StatusVenda.Concluida, StatusPagamento.Pago),
         ["Agendado"] = (StatusVenda.EmEntrega, StatusPagamento.Pendente),
+        // Só para delivery: o entregador saiu com o pedido (o cliente vê "Saiu para entrega" no app).
+        ["Saiu para entrega"] = (StatusVenda.EmProcessamento, StatusPagamento.Pendente),
         ["Pendente Pagamento"] = (StatusVenda.Aberta, StatusPagamento.Pendente),
         ["Cancelado"] = (StatusVenda.Cancelada, StatusPagamento.Cancelado),
     };
@@ -66,6 +68,7 @@ public abstract class PdvController : PainelController
     {
         StatusVenda.Concluida or StatusVenda.Paga => "Concluído",
         StatusVenda.EmEntrega => "Agendado",
+        StatusVenda.EmProcessamento => "Saiu para entrega",
         StatusVenda.Cancelada => "Cancelado",
         _ => "Pendente Pagamento"
     };

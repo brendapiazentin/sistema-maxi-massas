@@ -104,19 +104,28 @@ class Pedido {
             .toList(),
       );
 
-  /// Aberta/EmProcessamento = em preparo; EmEntrega = saiu (ou pronto); Concluida/Paga = concluído ("Concluído" no Sistema Web).
+  /// Tradução do status da venda no Sistema Web:
+  ///   Pendente Pagamento (Aberta) e Agendado (EmEntrega) = em preparo;
+  ///   Saiu para entrega (EmProcessamento, só delivery) = saiu;
+  ///   Concluído (Concluida/Paga) = concluído; Cancelado = cancelado.
   EtapaPedido get etapa => switch (status) {
-        'EmEntrega' => EtapaPedido.saiu,
+        'EmProcessamento' => ehEntrega ? EtapaPedido.saiu : EtapaPedido.emPreparo,
         'Concluida' || 'Paga' => EtapaPedido.concluido,
         'Cancelada' => EtapaPedido.cancelado,
         _ => EtapaPedido.emPreparo,
       };
 
-  /// Rótulos das etapas, diferentes para entrega e retirada.
+  /// Entrega tem três etapas; retirada só duas, porque o cliente já sabe o horário em que vai buscar.
   List<String> get rotulosEtapas => ehEntrega
       ? const ['Em preparo', 'Saiu para entrega', 'Entregue']
-      : const ['Em preparo', 'Pronto para retirada', 'Retirado'];
+      : const ['Agendado', 'Retirado'];
 
-  String get rotuloStatus =>
-      etapa == EtapaPedido.cancelado ? 'Cancelado' : rotulosEtapas[etapa.index];
+  /// Posição da etapa atual em [rotulosEtapas].
+  int get indiceEtapa => switch (etapa) {
+        EtapaPedido.concluido => rotulosEtapas.length - 1,
+        EtapaPedido.saiu => 1,
+        _ => 0,
+      };
+
+  String get rotuloStatus => etapa == EtapaPedido.cancelado ? 'Cancelado' : rotulosEtapas[indiceEtapa];
 }

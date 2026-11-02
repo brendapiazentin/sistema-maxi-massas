@@ -119,7 +119,7 @@ class _PedidoDetalheScreenState extends State<PedidoDetalheScreen> {
                     Icon(Icons.check_circle, color: Colors.green, size: 32),
                     SizedBox(width: 12),
                     Expanded(
-                      child: Text('Pedido recebido! A loja já foi avisada e vai começar a preparar.',
+                      child: Text('Pedido recebido! A loja já foi avisada.',
                           style: TextStyle(fontWeight: FontWeight.w600)),
                     ),
                   ],
@@ -226,7 +226,7 @@ class _Etapas extends StatelessWidget {
         subtitle: Text('Em caso de dúvida, fale com a loja.'),
       );
     }
-    final atual = pedido.etapa.index;
+    final atual = pedido.indiceEtapa;
     final rotulos = pedido.rotulosEtapas;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

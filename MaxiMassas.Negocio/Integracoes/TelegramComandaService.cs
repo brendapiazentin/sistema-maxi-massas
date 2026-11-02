@@ -1,4 +1,6 @@
-// Envia a comanda de uma venda com entrega para o Telegram dos entregadores (bot da loja).
+// Envia a comanda de uma venda para o Telegram da equipe (bot da loja): entregas (Web e app) e
+// retiradas feitas pelo app. A primeira linha muda conforme o tipo, com um ícone diferente, para a
+// notificação do celular já mostrar se é ENTREGA ou RETIRADA sem precisar abrir a mensagem.
 // O token do bot vem da configuracao "Telegram:BotToken" (variavel de ambiente Telegram__BotToken no servidor)
 // e os destinatarios (chat_id) vem da tela Entregas > Configuracoes de entrega.
 // Falha no envio nunca derruba a venda: o erro e registrado no log (sem o token) e o fluxo segue.
@@ -54,6 +56,13 @@ public class TelegramComandaService : ITelegramComandaService
                 return;
             }
 
+            if (venda.Entrega?.TipoEntrega == TipoEntrega.Retirada)
+            {
+                var textoRetirada = MontarTextoRetirada(venda);
+                await Task.WhenAll(destinos.Select(d => EnviarAsync(token, d, textoRetirada, null, null, venda.Id)));
+                return;
+            }
+
             var enderecoTexto = MontarEndereco(venda);
             var consulta = WebUtility.UrlEncode(enderecoTexto + ", Brasil").Replace("+", "%20");
             var linkWaze = $"https://waze.com/ul?q={consulta}&navigate=yes";
@@ -69,28 +78,37 @@ public class TelegramComandaService : ITelegramComandaService
         }
     }
 
-    private async Task EnviarAsync(string token, string chatId, string texto, string linkWaze, string linkMaps, int vendaId)
+    /// <summary>Sem links (retirada), a mensagem vai sem os botões de mapa.</summary>
+    private async Task EnviarAsync(string token, string chatId, string texto, string? linkWaze, string? linkMaps, int vendaId)
     {
         try
         {
-            var payload = new
-            {
-                chat_id = chatId,
-                text = texto,
-                parse_mode = "HTML",
-                disable_web_page_preview = true,
-                reply_markup = new
+            object payload = linkWaze is null || linkMaps is null
+                ? new
                 {
-                    inline_keyboard = new[]
+                    chat_id = chatId,
+                    text = texto,
+                    parse_mode = "HTML",
+                    disable_web_page_preview = true
+                }
+                : new
+                {
+                    chat_id = chatId,
+                    text = texto,
+                    parse_mode = "HTML",
+                    disable_web_page_preview = true,
+                    reply_markup = new
                     {
-                        new[]
+                        inline_keyboard = new[]
                         {
-                            new { text = "Abrir no Waze", url = linkWaze },
-                            new { text = "Abrir no Google Maps", url = linkMaps }
+                            new[]
+                            {
+                                new { text = "Abrir no Waze", url = linkWaze },
+                                new { text = "Abrir no Google Maps", url = linkMaps }
+                            }
                         }
                     }
-                }
-            };
+                };
 
             var client = _httpClientFactory.CreateClient("Telegram");
             var resposta = await client.PostAsJsonAsync($"/bot{token}/sendMessage", payload);
@@ -144,7 +162,7 @@ public class TelegramComandaService : ITelegramComandaService
 
         var linhas = new List<string>
         {
-            $"<b>NOVA ENTREGA — Pedido #{v.Id}</b>",
+            $"🛵 <b>ENTREGA — Pedido #{v.Id}</b>",
             "",
             $"<b>Nome:</b> {H(v.Cliente?.Nome)}",
             $"<b>Celular:</b> {H(v.Cliente?.Telefone)}"
@@ -167,6 +185,38 @@ public class TelegramComandaService : ITelegramComandaService
         linhas.Add($"<b>Total: {R(v.ValorTotal)}</b>");
         if (v.Pagamento is not null)
             linhas.Add($"<b>Pagamento:</b> {NomeForma(v.Pagamento.FormaPagamento)}");
+        if (!string.IsNullOrWhiteSpace(v.Observacao))
+            linhas.Add($"<b>Obs.:</b> {H(v.Observacao)}");
+
+        return string.Join("\n", linhas);
+    }
+
+    /// <summary>Comanda de retirada na loja: sem endereço e sem taxa de entrega.</summary>
+    private static string MontarTextoRetirada(Venda v)
+    {
+        static string H(string? s) => WebUtility.HtmlEncode(s ?? string.Empty);
+        static string R(decimal valor) => "R$ " + valor.ToString("F2", CultureInfo.InvariantCulture).Replace('.', ',');
+
+        var e = v.Entrega!;
+        var quando = $"{e.DataEntrega.ToString("dd/MM", CultureInfo.InvariantCulture)} às {H(e.Horario)}";
+        var linhas = new List<string>
+        {
+            $"🛍️ <b>RETIRADA NA LOJA — {quando}</b>",
+            $"Pedido #{v.Id} (app)",
+            "",
+            $"<b>Nome:</b> {H(v.Cliente?.Nome)}",
+            $"<b>Celular:</b> {H(v.Cliente?.Telefone)}",
+            "",
+            "<b>Itens:</b>"
+        };
+        foreach (var i in v.ItensVenda)
+            linhas.Add($"• {i.Quantidade}x {H(i.Produto?.Nome)} — {R(i.Subtotal)}");
+
+        linhas.Add("");
+        if (v.Desconto > 0) linhas.Add("Desconto aplicado");
+        linhas.Add($"<b>Total: {R(v.ValorTotal)}</b>");
+        if (v.Pagamento is not null)
+            linhas.Add($"<b>Pagamento:</b> {NomeForma(v.Pagamento.FormaPagamento)} (na retirada)");
         if (!string.IsNullOrWhiteSpace(v.Observacao))
             linhas.Add($"<b>Obs.:</b> {H(v.Observacao)}");
 
