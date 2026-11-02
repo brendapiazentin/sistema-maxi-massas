@@ -1,0 +1,12 @@
+@* Status da venda como botão: abre o modal de status rápido (Vendas/Index). *@
+@model MaxiMassas.Modelos.Dtos.Response.VendaResponse
+@{
+    var rotulo = MaxiMassas.Web.Models.VendasViewModel.RotuloStatus(Model.Status);
+    // No modal, o status atual fica marcado com o mesmo nome do botão.
+    var rotuloModal = rotulo == "Pendente" || rotulo == "Pago" ? (rotulo == "Pago" ? "Concluído" : "Pendente Pagamento") : rotulo;
+    var entrega = Model.Entrega?.TipoEntrega == MaxiMassas.Modelos.TipoEntrega.Entrega;
+}
+<button type="button" class="btn-status-rapido status-venda-text"
+        data-bs-toggle="modal" data-bs-target="#modalStatusVenda"
+        data-id="@Model.Id" data-nome="@Model.NomeCliente" data-status="@rotuloModal" data-entrega="@(entrega ? "1" : "0")"
+        title="Alterar status da venda #@Model.Id">@rotulo</button>

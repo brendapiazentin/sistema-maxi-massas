@@ -51,7 +51,7 @@ public abstract class PdvController : PainelController
     };
 
     /// <summary>Status da tela → (status da venda, status do pagamento). "Agendado" = EmEntrega (convenção da tela de Vendas).</summary>
-    protected static readonly Dictionary<string, (StatusVenda Venda, StatusPagamento Pagamento)> StatusPorRotulo = new()
+    public static readonly Dictionary<string, (StatusVenda Venda, StatusPagamento Pagamento)> StatusPorRotulo = new()
     {
         ["Concluído"] = (StatusVenda.Concluida, StatusPagamento.Pago),
         ["Agendado"] = (StatusVenda.EmEntrega, StatusPagamento.Pendente),

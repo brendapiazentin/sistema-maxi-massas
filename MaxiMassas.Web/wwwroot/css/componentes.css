@@ -2381,3 +2381,17 @@
     from { transform: translateY(12px); opacity: 0; }
     to   { transform: translateY(0);    opacity: 1; }
 }
+
+/* Status rápido na lista de Vendas: o próprio status é o botão */
+.btn-status-rapido {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 2px 6px;
+    cursor: pointer;
+}
+.btn-status-rapido::after { content: " ▾"; font-size: 10px; }
+.btn-status-rapido:hover { border-color: #EDEDED; background: #F9F9F9; }
+.btn-status-opcao { justify-content: flex-start; padding: 10px 14px; font-size: 14px; }
+.btn-status-opcao:disabled { opacity: 1; cursor: default; }
+

@@ -125,12 +125,103 @@ class _FinalizarPedidoScreenState extends State<FinalizarPedidoScreen> {
     return null;
   }
 
-  Future<void> _enviar() async {
+  /// Etapa de revisão (estilo iFood): resumo em uma folha que sobe sobre a tela escurecida.
+  Future<void> _revisar() async {
     final falta = _pendencia();
     if (falta != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(falta)));
       return;
     }
+    final carrinho = context.read<CarrinhoProvider>();
+    final subtotal = carrinho.subtotal;
+    final entrega = _tipo == TipoEntrega.entrega;
+    final taxa = entrega ? (carrinho.config?.calcularTaxa(subtotal) ?? 0.0) : 0.0;
+    final total = subtotal + taxa;
+
+    final confirmou = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: Colors.white,
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.75),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Revise seu pedido', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final i in carrinho.itens)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text('${i.quantidade}x ${i.produto.nome}')),
+                              Text(reais(i.subtotal)),
+                            ],
+                          ),
+                        ),
+                      const Divider(height: 24),
+                      _itemRevisao(
+                        entrega ? Icons.location_on_outlined : Icons.storefront,
+                        entrega ? 'Entrega' : 'Retirada na loja',
+                        entrega
+                            ? '${_endereco!.linha1}\n${_endereco!.linha2}\n${_horario!.dia}, ${_horario!.hora}'
+                            : '${_horario!.dia}, ${_horario!.hora}',
+                      ),
+                      _itemRevisao(Icons.payments_outlined, 'Pagamento',
+                          '${_pagamento!.rotulo} (${entrega ? 'ao entregador' : 'na retirada'})'),
+                      if (_observacao.text.trim().isNotEmpty)
+                        _itemRevisao(Icons.notes, 'Observação', _observacao.text.trim()),
+                      const Divider(height: 24),
+                      if (entrega) _linha('Taxa de entrega', taxa == 0 ? 'Grátis' : reais(taxa)),
+                      _linha('Total a pagar', reais(total), negrito: true),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), backgroundColor: Tema.vinho),
+                  child: Text('Fazer pedido • ${reais(total)}'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (confirmou == true && mounted) await _enviar();
+  }
+
+  Widget _itemRevisao(IconData icone, String titulo, String texto) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icone, color: Tema.vinho, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(titulo, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(texto, style: const TextStyle(color: Colors.black54)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Future<void> _enviar() async {
     final carrinho = context.read<CarrinhoProvider>();
     final pedidos = context.read<PedidosProvider>();
     final cardapio = context.read<CardapioProvider>();
@@ -279,12 +370,12 @@ class _FinalizarPedidoScreenState extends State<FinalizarPedidoScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           child: FilledButton(
-            onPressed: _enviando || carrinho.vazio ? null : _enviar,
+            onPressed: _enviando || carrinho.vazio ? null : _revisar,
             style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52), backgroundColor: Tema.vinho),
             child: _enviando
                 ? const SizedBox(
                     width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : Text('Fazer pedido • ${reais(total)}'),
+                : const Text('Revisar pedido'),
           ),
         ),
       ),
