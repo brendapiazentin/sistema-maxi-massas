@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -306,38 +307,96 @@ class _FinalizarPedidoScreenState extends State<FinalizarPedidoScreen> {
         child: Text('Não há horários disponíveis nos próximos dias.'),
       );
     }
-    // Agrupa por dia, mantendo a ordem que veio da API.
+    final h = _horario;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: _abrirSeletorHorario,
+        child: InputDecorator(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.schedule),
+            suffixIcon: Icon(Icons.keyboard_arrow_down),
+          ),
+          child: Text(h == null ? 'Escolher horário' : '${h.dia}, ${h.hora}',
+              style: const TextStyle(fontSize: 16)),
+        ),
+      ),
+    );
+  }
+
+  /// Rolagem em duas colunas (dia e hora), no estilo dos seletores de horário do celular.
+  Future<void> _abrirSeletorHorario() async {
     final porDia = <String, List<Horario>>{};
     for (final h in _horarios) {
       porDia.putIfAbsent(h.dia, () => []).add(h);
     }
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final dia in porDia.entries) ...[
-            Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 4),
-              child: Text(dia.key, style: const TextStyle(fontWeight: FontWeight.w600)),
-            ),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final h in dia.value)
-                  ChoiceChip(
-                    label: Text(h.hora),
-                    selected: h.valor == _horario?.valor,
-                    selectedColor: Tema.vinho.withValues(alpha: 0.15),
-                    onSelected: (_) => setState(() => _horario = h),
+    final dias = porDia.keys.toList();
+    var iDia = _horario == null ? 0 : dias.indexOf(_horario!.dia);
+    if (iDia < 0) iDia = 0;
+    var iHora = _horario == null ? 0 : porDia[dias[iDia]]!.indexWhere((h) => h.valor == _horario!.valor);
+    if (iHora < 0) iHora = 0;
+
+    final escolhido = await showModalBottomSheet<Horario>(
+      context: context,
+      backgroundColor: Colors.white,
+      showDragHandle: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) {
+          final horas = porDia[dias[iDia]]!;
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(_tipo == TipoEntrega.entrega ? 'Horário da entrega' : 'Horário da retirada',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(
+                    height: 200,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: CupertinoPicker(
+                            itemExtent: 40,
+                            scrollController: FixedExtentScrollController(initialItem: iDia),
+                            onSelectedItemChanged: (i) => setSheet(() {
+                              iDia = i;
+                              iHora = 0;
+                            }),
+                            children: [for (final d in dias) Center(child: Text(d))],
+                          ),
+                        ),
+                        Expanded(
+                          child: CupertinoPicker(
+                            // A chave nova recria a coluna de horas quando o dia muda.
+                            key: ValueKey(dias[iDia]),
+                            itemExtent: 40,
+                            scrollController: FixedExtentScrollController(initialItem: iHora),
+                            onSelectedItemChanged: (i) => iHora = i,
+                            children: [for (final h in horas) Center(child: Text(h.hora))],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-              ],
+                  const SizedBox(height: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(ctx, horas[iHora < horas.length ? iHora : 0]),
+                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48), backgroundColor: Tema.vinho),
+                    child: const Text('Confirmar'),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ],
+          );
+        },
       ),
     );
+    if (escolhido != null && mounted) setState(() => _horario = escolhido);
   }
 }
 

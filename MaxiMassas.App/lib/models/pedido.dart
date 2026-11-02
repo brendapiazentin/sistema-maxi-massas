@@ -104,10 +104,10 @@ class Pedido {
             .toList(),
       );
 
-  /// Aberta/EmProcessamento/Paga = em preparo; EmEntrega = saiu (ou pronto); Concluida; Cancelada.
+  /// Aberta/EmProcessamento = em preparo; EmEntrega = saiu (ou pronto); Concluida/Paga = concluído ("Concluído" no Sistema Web).
   EtapaPedido get etapa => switch (status) {
         'EmEntrega' => EtapaPedido.saiu,
-        'Concluida' => EtapaPedido.concluido,
+        'Concluida' || 'Paga' => EtapaPedido.concluido,
         'Cancelada' => EtapaPedido.cancelado,
         _ => EtapaPedido.emPreparo,
       };

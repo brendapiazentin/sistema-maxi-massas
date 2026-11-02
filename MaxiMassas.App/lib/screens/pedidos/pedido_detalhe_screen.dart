@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -25,13 +27,38 @@ class PedidoDetalheScreen extends StatefulWidget {
 
 class _PedidoDetalheScreenState extends State<PedidoDetalheScreen> {
   late Pedido _pedido = widget.pedido;
+  late final PedidosProvider _pedidos = context.read<PedidosProvider>();
+  Timer? _timer;
 
-  Future<void> _atualizar() async {
+  bool get _finalizado =>
+      _pedido.etapa == EtapaPedido.concluido || _pedido.etapa == EtapaPedido.cancelado;
+
+  @override
+  void initState() {
+    super.initState();
+    // Status mudado pela loja no Sistema Web aparece aqui sem o cliente precisar atualizar.
+    _timer = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (!_finalizado) _atualizar(silencioso: true);
+    });
+    if (!widget.recemCriado) _atualizar(silencioso: true);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    // A lista da aba Pedidos fica com o mesmo status do detalhe (depois que a tela sai).
+    Future.microtask(_pedidos.carregar);
+    super.dispose();
+  }
+
+  Future<void> _atualizar({bool silencioso = false}) async {
     try {
-      final p = await context.read<PedidosProvider>().servico.obter(_pedido.id);
+      final p = await _pedidos.servico.obter(_pedido.id);
       if (mounted) setState(() => _pedido = p);
     } on ApiException catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.mensagem)));
+      if (mounted && !silencioso) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.mensagem)));
+      }
     }
   }
 

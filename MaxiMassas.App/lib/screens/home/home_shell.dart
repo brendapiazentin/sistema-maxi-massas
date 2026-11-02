@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
 import '../../core/tema.dart';
+import '../../providers/pedidos_provider.dart';
 import '../../widgets/barra_carrinho.dart';
 import '../cardapio/cardapio_screen.dart';
 import '../pedidos/pedidos_screen.dart';
@@ -30,7 +33,11 @@ class _HomeShellState extends State<HomeShell> {
           const BarraCarrinho(),
           NavigationBar(
             selectedIndex: _aba,
-            onDestinationSelected: (i) => setState(() => _aba = i),
+            onDestinationSelected: (i) {
+              setState(() => _aba = i);
+              // Ao abrir a aba Pedidos, busca o status mais recente dos pedidos.
+              if (i == 1) context.read<PedidosProvider>().carregar();
+            },
             backgroundColor: Colors.white,
             surfaceTintColor: Colors.transparent,
             indicatorColor: Tema.vinho.withValues(alpha: 0.12),
