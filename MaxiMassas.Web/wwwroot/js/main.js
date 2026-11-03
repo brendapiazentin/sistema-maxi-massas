@@ -88,7 +88,7 @@ function aplicarCoresStatusVendas() {
 
         if (textoStatus === 'concluído') {
             elemento.classList.add('status-venda-concluido');
-        } else if (textoStatus === 'agendado') {
+        } else if (textoStatus === 'agendado' || textoStatus === 'saiu para entrega') {
             elemento.classList.add('status-venda-agendado');
         } else if (textoStatus.includes('pendente')) { 
             // Usa 'includes' para pegar tanto "Pendente" quanto "Pendente Pagamento"

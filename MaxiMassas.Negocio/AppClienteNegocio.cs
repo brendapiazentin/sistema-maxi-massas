@@ -229,6 +229,9 @@ public class AppClienteNegocio : IAppClienteNegocio
                 throw new RegraDeNegocioException($"O produto \"{produto.NomeCompleto}\" não está mais disponível.");
         }
 
+        // Horário dentro da janela de funcionamento (entrega ou retirada), na hora de Brasília.
+        var agendado = HorarioFuncionamento.Validar(request.Horario, request.TipoEntrega, HorarioFuncionamento.Agora());
+
         var entrega = request.TipoEntrega == TipoEntrega.Entrega;
         var taxa = entrega ? (await _configEntrega.ObterAsync()).CalcularTaxa(await SubtotalAsync(itens)) : 0m;
         var endereco = entrega ? request.Endereco! : null;
@@ -249,8 +252,8 @@ public class AppClienteNegocio : IAppClienteNegocio
             Entrega = new EntregaRequest
             {
                 TipoEntrega = request.TipoEntrega,
-                DataEntrega = DateTime.Now,
-                Horario = request.Horario?.Trim() ?? string.Empty,
+                DataEntrega = agendado,
+                Horario = agendado.ToString("HH:mm"),
                 ValorEntrega = taxa,
                 Logradouro = endereco?.Logradouro.Trim(),
                 Numero = endereco?.Numero.Trim(),

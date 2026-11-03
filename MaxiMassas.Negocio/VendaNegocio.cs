@@ -190,8 +190,11 @@ public class VendaNegocio : IVendaNegocio
         }
 
         var salva = await _vendaRepo.GetVendaComDetalhesAsync(venda.Id);
-        // Delivery: manda a comanda ao Telegram dos entregadores (falha no envio nunca derruba a venda).
-        if (salva is { Entrega.TipoEntrega: TipoEntrega.Entrega })
+        // Comanda no Telegram (falha no envio nunca derruba a venda):
+        //  - toda venda com entrega, do Web ou do app, vai para os entregadores;
+        //  - retirada só quando o pedido vem do app (no balcão a equipe já está com o pedido).
+        if (salva is { Entrega.TipoEntrega: TipoEntrega.Entrega } ||
+            (salva is { Entrega.TipoEntrega: TipoEntrega.Retirada } && salva.Origem == AppClienteNegocio.OrigemApp))
             await _telegram.EnviarComandaAsync(salva);
         return _mapper.Map<VendaResponse>(salva!);
     }

@@ -38,6 +38,7 @@ public class VendasViewModel
     {
         StatusVenda.Paga => "Pago",
         StatusVenda.EmEntrega => "Agendado",
+        StatusVenda.EmProcessamento => "Saiu para entrega",
         StatusVenda.Concluida => "Concluído",
         StatusVenda.Cancelada => "Cancelado",
         _ => "Pendente"

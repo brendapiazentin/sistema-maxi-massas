@@ -73,7 +73,22 @@ public class PedidoAppRequestValidator : AbstractValidator<PedidoAppRequest>
             .When(p => p.TipoEntrega == TipoEntrega.Entrega);
         RuleFor(p => p.Endereco!).SetValidator(new EnderecoAppRequestValidator())
             .When(p => p.TipoEntrega == TipoEntrega.Entrega && p.Endereco is not null);
+        // Área de atendimento: a loja entrega somente em Itápolis (decisão dos proprietários).
+        RuleFor(p => p.Endereco!.Cidade)
+            .Must(EhItapolis).WithMessage("No momento entregamos apenas em Itápolis. Escolha a retirada na loja.")
+            .When(p => p.TipoEntrega == TipoEntrega.Entrega && p.Endereco is not null
+                       && !string.IsNullOrWhiteSpace(p.Endereco.Cidade));
         RuleFor(p => p.Observacao).MaximumLength(500);
         RuleFor(p => p.Horario).MaximumLength(30);
+    }
+
+    /// <summary>Compara sem acento e sem diferença de maiúsculas ("Itapolis", "ITÁPOLIS"...).</summary>
+    private static bool EhItapolis(string cidade)
+    {
+        var semAcento = new string(cidade.Trim().Normalize(System.Text.NormalizationForm.FormD)
+            .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                        != System.Globalization.UnicodeCategory.NonSpacingMark)
+            .ToArray());
+        return string.Equals(semAcento, "Itapolis", StringComparison.OrdinalIgnoreCase);
     }
 }

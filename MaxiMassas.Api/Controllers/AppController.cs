@@ -14,6 +14,7 @@
 //   PUT    /api/app/enderecos/{id}/principal    [cliente]  torna um endereço o principal
 //   GET    /api/app/entrega                     [anônimo]  taxa de entrega e mínimo para entrega grátis
 //   GET    /api/app/cep/{cep}                [anônimo]  rua, bairro, cidade e UF do CEP (preenche o formulário)
+//   GET    /api/app/horarios?tipo=Entrega      [anônimo]  horários livres para entrega ou retirada (próximos 3 dias)
 //   GET    /api/app/produtos                    [anônimo]  cardápio com preço e disponibilidade
 //   POST   /api/app/pedidos                     [cliente]  cria um pedido (vira Venda com Origem = "App")
 //   GET    /api/app/pedidos                     [cliente]  histórico do cliente, mais recentes primeiro
@@ -22,6 +23,7 @@
 // Toda operação de perfil/endereço devolve o perfil completo já atualizado: quem decide o
 // resultado final (ex.: qual endereço vira principal) é o servidor, o app só espelha.
 using MaxiMassas.Api.Seguranca;
+using MaxiMassas.Modelos;
 using MaxiMassas.Modelos.Dtos.Common;
 using MaxiMassas.Modelos.Dtos.Request;
 using MaxiMassas.Modelos.Dtos.Response;
@@ -140,6 +142,13 @@ public class AppController : ControllerBase
                 Cep = e.CEP, Logradouro = e.Logradouro, Bairro = e.Bairro, Cidade = e.Localidade, Estado = e.UF
             }));
     }
+
+    /// <summary>Horários disponíveis para entrega ou retirada, conforme o funcionamento da loja.</summary>
+    [HttpGet("horarios")]
+    [AllowAnonymous]
+    public IActionResult Horarios([FromQuery] TipoEntrega tipo = TipoEntrega.Entrega)
+        => Ok(ApiResponse<IEnumerable<HorarioAppResponse>>.Ok(
+            HorarioFuncionamento.Disponiveis(tipo, HorarioFuncionamento.Agora())));
 
     [HttpGet("produtos")]
     [AllowAnonymous]

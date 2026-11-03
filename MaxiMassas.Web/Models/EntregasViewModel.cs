@@ -39,6 +39,7 @@ public class EntregasViewModel
     {
         StatusVenda.Concluida => "Concluído",
         StatusVenda.Cancelada => "Cancelado",
+        StatusVenda.EmProcessamento => "Saiu para entrega",
         _ => "Pendente"
     };
 
