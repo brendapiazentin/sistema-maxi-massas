@@ -181,6 +181,15 @@ function acenderBotaoPDV(seletor, valorAtivo) {
     document.querySelectorAll(seletor).forEach(btn => btn.classList.toggle('active', btn.dataset.value === valorAtivo));
 }
 
+// Delivery: preenche data e hora com o momento atual (so se estiverem vazias; o vendedor pode alterar).
+function preencherDataHoraAtualPDV() {
+    const agora = new Date();
+    const dataEl = document.getElementById('dataAgendadaPDV');
+    const horaEl = document.getElementById('horaAgendadaPDV');
+    if (dataEl && !dataEl.value.trim()) dataEl.value = agora.toLocaleDateString('pt-BR');
+    if (horaEl && !horaEl.value.trim()) horaEl.value = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
 function configurarBotoesTogglePDV() {
     // 1. Tipo de Entrega
     const btnEntregas = document.querySelectorAll('.btn-tipo-entrega');
@@ -193,6 +202,8 @@ function configurarBotoesTogglePDV() {
 
             estadoVenda.tipoEntrega = btn.dataset.value;
             blocoEndereco.classList.toggle('d-none', estadoVenda.tipoEntrega !== 'Delivery');
+            atualizarBotaoSaiuPDV();
+            if (!MODO_EDICAO && estadoVenda.tipoEntrega === 'Delivery') preencherDataHoraAtualPDV();
             atualizarComandaPDV();
         });
     });
@@ -528,6 +539,7 @@ function restaurarEstadoPDV(salvo) {
     acenderBotaoPDV('.btn-plataforma', estadoVenda.plataforma);
     acenderBotaoPDV('.btn-pagamento', estadoVenda.pagamento);
     acenderBotaoPDV('.btn-status', estadoVenda.status);
+    atualizarBotaoSaiuPDV();
 
     // 3. Campos de texto
     document.getElementById('obsPDV').value = estadoVenda.obs;
@@ -612,3 +624,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     atualizarComandaPDV(); // Render inicial
 });
+
+// "Saiu para entrega" só existe para Delivery. Se mudar para Retirada com ele marcado, o status é limpo.
+function atualizarBotaoSaiuPDV() {
+    const delivery = estadoVenda.tipoEntrega === 'Delivery';
+    document.querySelectorAll('.btn-status-saiu').forEach(btn => {
+        btn.classList.toggle('d-none', !delivery);
+        if (!delivery && estadoVenda.status === 'Saiu para entrega') {
+            btn.classList.remove('active');
+            estadoVenda.status = '';
+        }
+    });
+}

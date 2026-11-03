@@ -88,7 +88,7 @@ function aplicarCoresStatusVendas() {
 
         if (textoStatus === 'concluído') {
             elemento.classList.add('status-venda-concluido');
-        } else if (textoStatus === 'agendado') {
+        } else if (textoStatus === 'agendado' || textoStatus === 'saiu para entrega') {
             elemento.classList.add('status-venda-agendado');
         } else if (textoStatus.includes('pendente')) { 
             // Usa 'includes' para pegar tanto "Pendente" quanto "Pendente Pagamento"
@@ -730,7 +730,7 @@ function configurarModalProduto() {
 
     const campos = {
         id: 'inputId', nome: 'inputNome', sabor: 'inputSabor', peso: 'inputPeso', custo: 'inputCusto',
-        preco: 'inputPreco', estoque: 'inputEstoque', tipo: 'inputTipo', obs: 'inputObs'
+        preco: 'inputPreco', estoque: 'inputEstoque', tipo: 'inputTipo', obs: 'inputObs', ativo: 'inputAtivo'
     };
 
     modalProdutoElement.addEventListener('show.bs.modal', function (event) {
@@ -739,9 +739,11 @@ function configurarModalProduto() {
         if (!botaoClicado) return;
 
         const editando = botaoClicado.classList.contains('btn-editar-produto');
-        const dados = editando ? botaoClicado.dataset : { id: '0' };
+        const dados = editando ? botaoClicado.dataset : { id: '0', ativo: 'true' };
 
         Object.entries(campos).forEach(([chave, id]) => { document.getElementById(id).value = dados[chave] || ''; });
+        const campoFoto = document.getElementById('inputFoto'); if (campoFoto) campoFoto.value = '';
+        const campoRemover = document.getElementById('inputRemoverFoto'); if (campoRemover) campoRemover.checked = false;
         const estoque = document.getElementById('inputEstoque');
         estoque.readOnly = editando;
         estoque.required = !editando;

@@ -12,5 +12,7 @@ public class ProdutoResponse
     public decimal PrecoVenda { get; set; }
     public decimal Custo { get; set; }
     public TipoProduto Tipo { get; set; }
+    public bool Ativo { get; set; }
+    public DateTime? FotoAtualizadaEm { get; set; }
     public EstoqueResponse? Estoque { get; set; }
 }

@@ -103,6 +103,8 @@ public class AppDbContext : DbContext
             e.Property(c => c.Id).ValueGeneratedNever();
             e.Property(c => c.TaxaEntrega).HasColumnType("decimal(10,2)");
             e.Property(c => c.PedidoMinimoEntregaGratis).HasColumnType("decimal(10,2)");
+            e.Property(c => c.TelegramEntregador1).HasMaxLength(30);
+            e.Property(c => c.TelegramEntregador2).HasMaxLength(30);
             e.HasData(new ConfiguracaoEntrega
             {
                 Id = ConfiguracaoEntrega.IdUnico,

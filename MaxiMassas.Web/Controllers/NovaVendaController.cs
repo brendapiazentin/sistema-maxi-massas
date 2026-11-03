@@ -46,6 +46,8 @@ public class NovaVendaController : PdvController
         if (string.IsNullOrWhiteSpace(Vm.Venda.Plataforma)) return "Escolha a plataforma do pedido.";
         if (!PagamentoPorRotulo.TryGetValue(Vm.Venda.Pagamento, out pagamento)) return "Escolha a forma de pagamento.";
         if (!StatusPorRotulo.TryGetValue(Vm.Venda.Status, out status)) return "Escolha o status da venda.";
+        if (status.Venda == StatusVenda.EmProcessamento && Vm.Venda.TipoEntrega != "Delivery")
+            return "\"Saiu para entrega\" vale só para vendas com Delivery.";
         if (status.Venda == StatusVenda.Cancelada) return "Uma venda nova não pode ser registrada como cancelada.";
         if (!string.IsNullOrWhiteSpace(Vm.Venda.DataAgendada) && dataAgendada is null) return "Data agendada inválida. Use DD/MM/AAAA.";
         if (!string.IsNullOrWhiteSpace(Vm.Venda.HoraAgendada) && LerHora(Vm.Venda.HoraAgendada) is null) return "Hora agendada inválida. Use HH:MM.";

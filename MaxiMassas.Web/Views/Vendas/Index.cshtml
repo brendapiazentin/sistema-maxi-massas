@@ -58,6 +58,7 @@
                     <option value="">Status</option>
                     <option value="Concluído">Concluído</option>
                     <option value="Agendado">Agendado</option>
+                    <option value="Saiu para entrega">Saiu para entrega</option>
                     <option value="Pendente">Pendente</option>
                     <option value="Cancelado">Cancelado</option>
                 </select>
@@ -138,7 +139,7 @@
                                 <td>@PainelFormatos.Moeda(venda.ValorTotal)</td>
                                 <td>@VendasViewModel.RotuloPagamento(venda.Pagamento?.FormaPagamento)</td>
                                 <td>@(string.IsNullOrEmpty(venda.Origem) ? "—" : venda.Origem)</td>
-                                <td class="status-venda-text">@VendasViewModel.RotuloStatus(venda.Status)</td>
+                                <td>@await Html.PartialAsync("_BotaoStatusVenda", venda)</td>
                                 <td class="text-center"><a class="btn-icone d-inline-block" asp-controller="AlterarVenda" asp-action="Index" asp-route-id="@venda.Id" title="Editar venda #@venda.Id"><img src="~/assets/icons/icone-edicao.svg" alt="Editar"></a></td>
                             </tr>
                         }
@@ -169,7 +170,7 @@
                     </div>
                     <div class="card-venda-row">
                         <span class="m-venda-itens">@(totalItens == 1 ? "1 item" : $"{totalItens} itens")</span>
-                        <span class="status-venda-text">@VendasViewModel.RotuloStatus(venda.Status)</span>
+                        @await Html.PartialAsync("_BotaoStatusVenda", venda)
                     </div>
                 </div>
             }
@@ -250,8 +251,55 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- MODAL: STATUS RÁPIDO (clique no status)    -->
+    <!-- ========================================== -->
+    <div class="modal fade" id="modalStatusVenda" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-bottom" style="max-width: 420px;">
+            <div class="modal-content modal-custom-content">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title-custom mb-0">Status do pedido <span id="statusVendaTitulo"></span></h5>
+                </div>
+                <div class="modal-body p-0 mt-3">
+                    <form method="post" asp-action="Status" id="formStatusVenda">
+                        <input type="hidden" name="id" id="statusVendaId" value="0">
+                        <div class="d-flex flex-column gap-2">
+                            <button type="submit" name="status" value="Pendente Pagamento" class="btn-toggle-pdv btn-status-opcao">Pendente Pagamento</button>
+                            <button type="submit" name="status" value="Agendado" class="btn-toggle-pdv btn-status-opcao">Agendado</button>
+                            <button type="submit" name="status" value="Saiu para entrega" class="btn-toggle-pdv btn-status-opcao opcao-so-entrega">Saiu para entrega</button>
+                            <button type="submit" name="status" value="Concluído" class="btn-toggle-pdv btn-status-opcao">Concluído</button>
+                            <button type="submit" name="status" value="Cancelado" class="btn-toggle-pdv btn-status-opcao">Cancelado</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer modal-footer-custom mt-4 p-0">
+                    <button type="button" class="btn-cancelar-custom" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @section Scripts {
     <script>
+        // Status rápido: o botão de status da linha abre o modal já com o pedido e o status atual.
+        document.getElementById('modalStatusVenda').addEventListener('show.bs.modal', ev => {
+            const b = ev.relatedTarget;
+            document.getElementById('statusVendaId').value = b.dataset.id;
+            document.getElementById('statusVendaTitulo').textContent = '#' + b.dataset.id + ' • ' + b.dataset.nome;
+            document.querySelectorAll('.btn-status-opcao').forEach(op => {
+                const atual = op.value === b.dataset.status;
+                op.classList.toggle('active', atual);
+                op.disabled = atual;
+                if (op.classList.contains('opcao-so-entrega')) op.classList.toggle('d-none', b.dataset.entrega !== '1');
+            });
+        });
+        document.getElementById('formStatusVenda').addEventListener('submit', ev => {
+            if (ev.submitter && ev.submitter.value === 'Cancelado' &&
+                !confirm('Cancelar esta venda? Os itens voltam ao estoque e ela não poderá ser reaberta.')) {
+                ev.preventDefault();
+            }
+        });
+
         // Catálogo para a busca do Consumo próprio — vindo do servidor, sem chamar a API.
         window.CONSUMO_PRODUTOS = @Html.Raw(Model.ProdutosConsumoJson);
         @if (Model.ErroConsumo is not null)

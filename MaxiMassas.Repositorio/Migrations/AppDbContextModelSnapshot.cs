@@ -130,6 +130,14 @@ namespace MaxiMassas.Repositorio.Migrations
                     b.Property<decimal>("TaxaEntrega")
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<string>("TelegramEntregador1")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("TelegramEntregador2")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.HasKey("Id");
 
                     b.ToTable("ConfiguracoesEntrega");
@@ -516,8 +524,14 @@ namespace MaxiMassas.Repositorio.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("Custo")
                         .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime?>("FotoAtualizadaEm")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Nome")
                         .IsRequired()

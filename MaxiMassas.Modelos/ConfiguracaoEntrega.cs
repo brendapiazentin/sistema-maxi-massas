@@ -17,6 +17,12 @@ public class ConfiguracaoEntrega
     /// </summary>
     public decimal PedidoMinimoEntregaGratis { get; set; }
 
+    /// <summary>Identificador (chat_id) do Telegram do entregador 1. Vazio = nao envia.</summary>
+    public string? TelegramEntregador1 { get; set; }
+
+    /// <summary>Identificador (chat_id) do Telegram do entregador 2. Vazio = nao envia.</summary>
+    public string? TelegramEntregador2 { get; set; }
+
     public DateTime AtualizadoEm { get; set; } = DateTime.Now;
 
     /// <summary>Taxa a cobrar para um pedido de entrega com este subtotal.</summary>

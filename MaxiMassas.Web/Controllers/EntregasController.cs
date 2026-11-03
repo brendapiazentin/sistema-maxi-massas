@@ -77,10 +77,12 @@ public class EntregasController : PainelController
     }
 
     [HttpPost("Taxa")]
-    public async Task<IActionResult> Taxa(string? taxaEntrega, string? pedidoMinimo)
+    public async Task<IActionResult> Taxa(string? taxaEntrega, string? pedidoMinimo, string? telegramEntregador1, string? telegramEntregador2)
     {
         Vm.TaxaDigitada = taxaEntrega;
         Vm.MinimoDigitado = pedidoMinimo;
+        Vm.Telegram1Digitado = telegramEntregador1;
+        Vm.Telegram2Digitado = telegramEntregador2;
 
         if (!Vm.PodeAlterarTaxa) return await ComErroAsync("Somente administradores podem alterar a taxa de entrega.");
 
@@ -89,7 +91,18 @@ public class EntregasController : PainelController
         if (taxa is null or < 0 || minimo is null or < 0)
             return await ComErroAsync("Informe os dois valores em reais, por exemplo R$ 4,99 (use R$ 0,00 para nenhum).");
 
-        await _config.AtualizarAsync(new ConfiguracaoEntregaRequest { TaxaEntrega = taxa.Value, PedidoMinimoEntregaGratis = minimo.Value });
+        // O Telegram identifica a pessoa por um numero (chat_id); vazio = nao envia comanda para essa vaga.
+        var idsTelegram = new[] { telegramEntregador1?.Trim(), telegramEntregador2?.Trim() };
+        if (idsTelegram.Any(id => !string.IsNullOrEmpty(id) && !System.Text.RegularExpressions.Regex.IsMatch(id, @"^-?\d{5,20}$")))
+            return await ComErroAsync("O identificador do Telegram deve conter apenas numeros. Deixe em branco para não enviar.");
+
+        await _config.AtualizarAsync(new ConfiguracaoEntregaRequest
+        {
+            TaxaEntrega = taxa.Value,
+            PedidoMinimoEntregaGratis = minimo.Value,
+            TelegramEntregador1 = idsTelegram[0],
+            TelegramEntregador2 = idsTelegram[1]
+        });
         _logger.LogInformation("[Painel] Taxa de entrega: {Taxa}, grátis a partir de {Minimo}.", taxa, minimo);
         TempData["Mensagem"] = minimo > 0
             ? $"Taxa de entrega: {PainelFormatos.Moeda(taxa.Value)}. Grátis em pedidos a partir de {PainelFormatos.Moeda(minimo.Value)}."

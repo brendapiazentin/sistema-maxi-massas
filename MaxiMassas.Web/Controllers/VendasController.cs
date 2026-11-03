@@ -72,6 +72,53 @@ public class VendasController : PainelController
         }));
     }
 
+    /// <summary>
+    /// Troca rápida de status pela lista de Vendas (sem abrir a tela de edição).
+    /// Mantém plataforma, pagamento e observação; usa as mesmas regras do Alterar Venda.
+    /// </summary>
+    [HttpPost("Status")]
+    public async Task<IActionResult> Status([FromForm] int id, [FromForm] string status)
+    {
+        var venda = await _vendas.GetByIdAsync(id);
+        if (venda is null)
+        {
+            TempData["Mensagem"] = $"Venda #{id} não encontrada.";
+            return RedirectToAction(nameof(Index));
+        }
+        if (!PdvController.StatusPorRotulo.TryGetValue(status ?? string.Empty, out var novo))
+        {
+            TempData["Mensagem"] = "Status inválido.";
+            return RedirectToAction(nameof(Index));
+        }
+        if (novo.Venda == StatusVenda.EmProcessamento && venda.Entrega?.TipoEntrega != TipoEntrega.Entrega)
+        {
+            TempData["Mensagem"] = $"Venda #{id}: \"Saiu para entrega\" vale só para vendas com entrega.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            await _vendas.UpdateAsync(id, new VendaUpdateRequest
+            {
+                Status = novo.Venda,
+                StatusPagamento = novo.Pagamento,
+                DataPagamento = venda.Pagamento?.DataPagamento,
+                Origem = venda.Origem,
+                FormaPagamento = venda.Pagamento?.FormaPagamento,
+                Observacao = null // nulo mantém a observação atual
+            });
+            _logger.LogInformation("[Painel] Venda #{VendaId} alterada para {Status} pela lista.", id, novo.Venda);
+            TempData["Mensagem"] = novo.Venda == StatusVenda.Cancelada && venda.Status != StatusVenda.Cancelada
+                ? $"Venda #{id} cancelada. Os itens voltaram ao estoque."
+                : $"Venda #{id}: {status}.";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["Mensagem"] = $"Venda #{id}: {ex.Message}";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {

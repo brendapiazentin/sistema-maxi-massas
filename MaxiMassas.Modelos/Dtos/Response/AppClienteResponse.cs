@@ -45,6 +45,8 @@ public class ProdutoAppResponse
     public decimal Preco { get; set; }
     public string Categoria { get; set; } = string.Empty;
     public bool Disponivel { get; set; }
+    /// <summary>Caminho da foto no servidor (ex.: /api/app/produtos/3/foto?v=123). Nulo = produto sem foto.</summary>
+    public string? FotoUrl { get; set; }
     /// <summary>Unidades em estoque: o app não deixa colocar mais do que isso no carrinho.</summary>
     public int Estoque { get; set; }
 }
@@ -75,4 +77,15 @@ public class ItemPedidoAppResponse
     public int Quantidade { get; set; }
     public decimal PrecoUnitario { get; set; }
     public decimal Subtotal { get; set; }
+}
+
+/// <summary>Horário que o cliente pode escolher para entrega ou retirada.</summary>
+public class HorarioAppResponse
+{
+    /// <summary>Valor enviado de volta no pedido, ex.: "03/11/2026 18:30".</summary>
+    public string Valor { get; set; } = string.Empty;
+    /// <summary>Rótulo do dia, ex.: "Hoje", "Amanhã", "Qua, 04/11".</summary>
+    public string Dia { get; set; } = string.Empty;
+    /// <summary>Hora para exibir, ex.: "18:30".</summary>
+    public string Hora { get; set; } = string.Empty;
 }

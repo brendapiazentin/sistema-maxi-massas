@@ -193,6 +193,7 @@ public class AppClienteNegocio : IAppClienteNegocio
     {
         var produtos = await _produtoRepo.GetAllComEstoqueAsync();
         return produtos
+            .Where(p => p.Ativo)
             .OrderBy(p => p.Tipo).ThenBy(p => p.Nome)
             .Select(p => new ProdutoAppResponse
             {
@@ -203,7 +204,8 @@ public class AppClienteNegocio : IAppClienteNegocio
                 Preco = p.PrecoVenda,
                 Categoria = CategoriaDoTipo(p.Tipo),
                 Disponivel = (p.Estoque?.Quantidade ?? 0) > 0,
-                Estoque = Math.Max(0, p.Estoque?.Quantidade ?? 0)
+                Estoque = Math.Max(0, p.Estoque?.Quantidade ?? 0),
+                FotoUrl = p.FotoAtualizadaEm is null ? null : $"/api/app/produtos/{p.Id}/foto?v={p.FotoAtualizadaEm.Value.Ticks}"
             });
     }
 
@@ -217,6 +219,18 @@ public class AppClienteNegocio : IAppClienteNegocio
             .GroupBy(i => i.ProdutoId)
             .Select(g => new ItemVendaRequest { ProdutoId = g.Key, Quantidade = g.Sum(i => i.Quantidade) })
             .ToList();
+
+        // Produto inativo some do cardápio; se o app ainda tiver um em cache, o pedido é recusado.
+        foreach (var item in itens)
+        {
+            var produto = await _produtoRepo.GetByIdAsync(item.ProdutoId)
+                ?? throw new KeyNotFoundException($"Produto ID {item.ProdutoId} nao encontrado.");
+            if (!produto.Ativo)
+                throw new RegraDeNegocioException($"O produto \"{produto.NomeCompleto}\" não está mais disponível.");
+        }
+
+        // Horário dentro da janela de funcionamento (entrega ou retirada), na hora de Brasília.
+        var agendado = HorarioFuncionamento.Validar(request.Horario, request.TipoEntrega, HorarioFuncionamento.Agora());
 
         var entrega = request.TipoEntrega == TipoEntrega.Entrega;
         var taxa = entrega ? (await _configEntrega.ObterAsync()).CalcularTaxa(await SubtotalAsync(itens)) : 0m;
@@ -238,8 +252,8 @@ public class AppClienteNegocio : IAppClienteNegocio
             Entrega = new EntregaRequest
             {
                 TipoEntrega = request.TipoEntrega,
-                DataEntrega = DateTime.Now,
-                Horario = request.Horario?.Trim() ?? string.Empty,
+                DataEntrega = agendado,
+                Horario = agendado.ToString("HH:mm"),
                 ValorEntrega = taxa,
                 Logradouro = endereco?.Logradouro.Trim(),
                 Numero = endereco?.Numero.Trim(),

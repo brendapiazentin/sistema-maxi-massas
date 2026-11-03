@@ -8,14 +8,15 @@ namespace MaxiMassas.Repositorio;
 public class RedefinicaoSenhaRepositorio : Repositorio<PasswordResetToken>, IRedefinicaoSenhaRepositorio
 {
     public RedefinicaoSenhaRepositorio(AppDbContext context) : base(context) { }
+    private static DateTime Agora => DateTime.Now; // hora local do sistema, enviada como parametro (DateTime.Now direto na consulta viraria GETDATE() do banco, que esta em UTC)
 
     public async Task<PasswordResetToken?> GetTokenAbertoUsuarioAsync(string hash)
         => await _context.PasswordResetTokens.FirstOrDefaultAsync(t =>
-            t.Destino == DestinoRedefinicao.Usuario && t.Token == hash && !t.Usado && t.ExpiresAt > DateTime.Now);
+            t.Destino == DestinoRedefinicao.Usuario && t.Token == hash && !t.Usado && t.ExpiresAt > Agora);
 
     public async Task<PasswordResetToken?> GetCodigoAbertoClienteAsync(int clienteId)
         => await _context.PasswordResetTokens
-            .Where(t => t.Destino == DestinoRedefinicao.Cliente && t.ReferenciaId == clienteId && !t.Usado && t.ExpiresAt > DateTime.Now)
+            .Where(t => t.Destino == DestinoRedefinicao.Cliente && t.ReferenciaId == clienteId && !t.Usado && t.ExpiresAt > Agora)
             .OrderByDescending(t => t.CriadoEm)
             .FirstOrDefaultAsync();
 

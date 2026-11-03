@@ -18,6 +18,7 @@ public class ErrorHandlingMiddleware
         try { await _next(context); }
         catch (KeyNotFoundException ex) { await Handle(context, ex, HttpStatusCode.NotFound, ex.Message); }
         catch (InvalidOperationException ex) { await Handle(context, ex, HttpStatusCode.BadRequest, ex.Message); }
+        catch (MaxiMassas.Negocio.RegraDeNegocioException ex) { await Handle(context, ex, HttpStatusCode.BadRequest, ex.Message); }
         catch (UnauthorizedAccessException ex) { await Handle(context, ex, HttpStatusCode.Forbidden, "Acesso negado."); }
         catch (Exception ex)
         {
@@ -30,7 +31,8 @@ public class ErrorHandlingMiddleware
     {
         ctx.Response.ContentType = "application/json";
         ctx.Response.StatusCode = (int)code;
-        var resp = ApiResponse.Fail(msg, new List<string> { ex.GetType().Name });
+        // Só a mensagem vai para o cliente: o nome da exceção é detalhe interno e aparecia no app.
+        var resp = ApiResponse.Fail(msg);
         await ctx.Response.WriteAsync(JsonSerializer.Serialize(resp,
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
     }

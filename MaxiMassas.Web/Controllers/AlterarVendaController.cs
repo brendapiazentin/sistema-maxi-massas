@@ -92,6 +92,8 @@ public class AlterarVendaController : PdvController
         if (venda is null) return VendaNaoEncontrada();
 
         if (!StatusPorRotulo.TryGetValue(Vm.Venda.Status, out var status)) Vm.Erro = "Escolha o status da venda.";
+        else if (status.Venda == StatusVenda.EmProcessamento && Vm.Venda.TipoEntrega != "Delivery")
+            Vm.Erro = "\"Saiu para entrega\" vale só para vendas com Delivery.";
         else if (!PagamentoPorRotulo.TryGetValue(Vm.Venda.Pagamento, out _)) Vm.Erro = "Escolha a forma de pagamento.";
         else if (string.IsNullOrWhiteSpace(Vm.Venda.Plataforma)) Vm.Erro = "Escolha a plataforma do pedido.";
         else if ((Vm.Venda.Observacao?.Length ?? 0) > 500) Vm.Erro = "A observação pode ter no máximo 500 caracteres.";

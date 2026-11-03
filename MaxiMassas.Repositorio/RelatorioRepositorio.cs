@@ -52,7 +52,8 @@ public class RelatorioRepositorio : IRelatorioRepositorio
                 QuantidadeVendida = g.Sum(i => i.Quantidade),
                 TotalFaturado = g.Sum(i => i.Subtotal)
             })
-            .OrderByDescending(p => p.QuantidadeVendida)
+            // .OrderByDescending(p => p.QuantidadeVendida)
+            .OrderByDescending(p => p.TotalFaturado)
             .Take(top)
             .ToListAsync();
 

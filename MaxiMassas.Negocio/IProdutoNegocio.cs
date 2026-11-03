@@ -10,4 +10,5 @@ public interface IProdutoNegocio
     Task<ProdutoResponse> CreateAsync(ProdutoRequest request);
     Task<ProdutoResponse?> UpdateAsync(int id, ProdutoUpdateRequest request);
     Task<bool> DeleteAsync(int id);
+    Task DefinirFotoAsync(int id, DateTime? atualizadaEm);
 }
