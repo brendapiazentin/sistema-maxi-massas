@@ -11,7 +11,8 @@ SAIDA="deploy/saida"
 mkdir -p "$SAIDA"
 
 echo ">> Compilando o app para web ..."
-(cd MaxiMassas.App && flutter build web --release --base-href /app/)
+# MSYS_NO_PATHCONV: impede o Git Bash de trocar "/app/" por "C:/Program Files/Git/app/".
+(cd MaxiMassas.App && MSYS_NO_PATHCONV=1 flutter build web --release --base-href /app/)
 tar czf "$SAIDA/AppWeb.tgz" -C MaxiMassas.App/build/web .
 
 echo ">> Enviando para $IP ..."
