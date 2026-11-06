@@ -55,6 +55,7 @@
             <table class="tabela-produtos tabela-estoque tabela-custom">
                 <thead>
                     <tr>
+                        <th class="text-center">Editar</th>
                         <th>#</th>
                         <th id="th-produto" style="cursor:pointer; user-select: none;">Produto <span>↕</span></th>
                         <th>Sabor</th>
@@ -62,7 +63,6 @@
                         <th>Tipo</th>
                         <th>Quantidade</th>
                         <th>Status Estoque</th>
-                        <th class="text-center">Editar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,13 +74,6 @@
                     {
                         var p = Model.Produtos[i];
                         <tr>
-                            <td class="col-num">@(i + 1)</td>
-                            <td class="col-prod">@p.Nome</td>
-                            <td>@(string.IsNullOrEmpty(p.Sabor) ? "—" : p.Sabor)</td>
-                            <td>@PainelFormatos.Peso(p.Peso)</td>
-                            <td class="tipo-item">@PainelFormatos.RotuloTipo(p.Tipo)</td>
-                            <td class="qtd-item">@(p.Estoque?.Quantidade ?? 0)</td>
-                            <td class="status-estoque-text status-item"></td>
                             <td class="text-center">
                                 @if (Model.PodeAjustar)
                                 {
@@ -91,6 +84,13 @@
                                     <span class="text-muted">—</span>
                                 }
                             </td>
+                            <td class="col-num">@(i + 1)</td>
+                            <td class="col-prod">@p.Nome</td>
+                            <td>@(string.IsNullOrEmpty(p.Sabor) ? "—" : p.Sabor)</td>
+                            <td>@PainelFormatos.Peso(p.Peso)</td>
+                            <td class="tipo-item">@PainelFormatos.RotuloTipo(p.Tipo)</td>
+                            <td class="qtd-item">@(p.Estoque?.Quantidade ?? 0)</td>
+                            <td class="status-estoque-text status-item"></td>
                         </tr>
                     }
                 </tbody>
