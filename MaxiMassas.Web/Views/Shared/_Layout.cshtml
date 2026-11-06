@@ -106,16 +106,16 @@
         </div>
         <div class="offcanvas-body d-flex flex-column">
             <ul class="list-unstyled">
-                <li><a class="nav-link-custom" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
-                <li><a class="nav-link-custom" asp-controller="Vendas" asp-action="Index">Vendas</a></li>
-                <li><a class="nav-link-custom" asp-controller="Clientes" asp-action="Index">Clientes</a></li>
-                <li><a class="nav-link-custom" asp-controller="Estoque" asp-action="Index">Estoque</a></li>
-                <li><a class="nav-link-custom" asp-controller="Produtos" asp-action="Index">Produtos</a></li>
-                <li><a class="nav-link-custom" asp-controller="Entregas" asp-action="Index">Entregas</a></li>
-                <li><a class="nav-link-custom" asp-controller="Evolucao" asp-action="Index">Evolução</a></li>
+                <li><a class="nav-link-custom menu-dashboard" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                <li><a class="nav-link-custom menu-vendas" asp-controller="Vendas" asp-action="Index">Vendas</a></li>
+                <li><a class="nav-link-custom menu-clientes" asp-controller="Clientes" asp-action="Index">Clientes</a></li>
+                <li><a class="nav-link-custom menu-estoque" asp-controller="Estoque" asp-action="Index">Estoque</a></li>
+                <li><a class="nav-link-custom menu-produtos" asp-controller="Produtos" asp-action="Index">Produtos</a></li>
+                <li><a class="nav-link-custom menu-entregas" asp-controller="Entregas" asp-action="Index">Entregas</a></li>
+                <li><a class="nav-link-custom menu-evolucao" asp-controller="Evolucao" asp-action="Index">Evolução</a></li>
                 @if (ehAdmin)
                 {
-                    <li><a class="nav-link-custom" asp-controller="Usuarios" asp-action="Index">Usuários</a></li>
+                    <li><a class="nav-link-custom menu-usuarios" asp-controller="Usuarios" asp-action="Index">Usuários</a></li>
                 }
             </ul>
 
