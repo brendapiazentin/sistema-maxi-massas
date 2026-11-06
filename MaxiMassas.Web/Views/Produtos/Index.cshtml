@@ -38,6 +38,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th class="text-center">Editar</th>
                         <th id="th-produto" style="cursor:pointer; user-select: none;">Produto <span>↕</span></th>
                         <th>Sabor</th>
                         <th>Peso</th>
@@ -45,7 +46,6 @@
                         <th>Custo</th>
                         <th>Preço</th>
                         <th>Obs</th>
-                        <th class="text-center">Editar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,14 +57,6 @@
                     {
                         var p = Model.Produtos[i];
                         <tr>
-                            <td class="col-num">@(i + 1)</td>
-                            <td class="col-prod">@if (p.FotoAtualizadaEm != null) { <img src="/FotoProduto/@p.Id?v=@p.FotoAtualizadaEm.Value.Ticks" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"> }@p.Nome @if (!p.Ativo) { <span class="badge bg-secondary ms-2">Inativo</span> }</td>
-                            <td>@(string.IsNullOrEmpty(p.Sabor) ? "—" : p.Sabor)</td>
-                            <td>@PainelFormatos.Peso(p.Peso)</td>
-                            <td>@PainelFormatos.RotuloTipo(p.Tipo)</td>
-                            <td>@PainelFormatos.Moeda(p.Custo)</td>
-                            <td class="col-preco">@PainelFormatos.Moeda(p.PrecoVenda)</td>
-                            <td>@(string.IsNullOrEmpty(p.Observacao) ? "—" : p.Observacao)</td>
                             <td class="text-center">
                                 @if (Model.PodeEditar)
                                 {
@@ -75,6 +67,14 @@
                                     <span class="text-muted">—</span>
                                 }
                             </td>
+                            <td class="col-num">@(i + 1)</td>
+                            <td class="col-prod">@if (p.FotoAtualizadaEm != null) { <img src="/FotoProduto/@p.Id?v=@p.FotoAtualizadaEm.Value.Ticks" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:6px;margin-right:8px;"> }@p.Nome @if (!p.Ativo) { <span class="badge bg-secondary ms-2">Inativo</span> }</td>
+                            <td>@(string.IsNullOrEmpty(p.Sabor) ? "—" : p.Sabor)</td>
+                            <td>@PainelFormatos.Peso(p.Peso)</td>
+                            <td>@PainelFormatos.RotuloTipo(p.Tipo)</td>
+                            <td>@PainelFormatos.Moeda(p.Custo)</td>
+                            <td class="col-preco">@PainelFormatos.Moeda(p.PrecoVenda)</td>
+                            <td>@(string.IsNullOrEmpty(p.Observacao) ? "—" : p.Observacao)</td>
                         </tr>
                     }
                 </tbody>
