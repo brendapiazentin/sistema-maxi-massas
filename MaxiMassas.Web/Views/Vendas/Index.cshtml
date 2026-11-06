@@ -98,8 +98,8 @@
             <table class="tabela-produtos tabela-clientes w-100 tabela-custom">
                 <thead>
                     <tr>
-                        <th class="text-center">Editar</th>
-                        <th class="respiro-esq">Pedido <span>↕</span></th>
+                        <th class="respiro-esq">Editar</th>
+                        <th class="text-center">Pedido <span>↕</span></th>
                         <th class="coluna-ordenavel">Nome <span>↕</span></th>
                         <th>Telefone</th>
                         <th class="coluna-ordenavel">Data <span>↕</span></th>
@@ -127,8 +127,8 @@
                         foreach (var item in itens)
                         {
                             <tr>
-                                <td class="text-center"><a class="btn-icone d-inline-block" asp-controller="AlterarVenda" asp-action="Index" asp-route-id="@venda.Id" title="Editar venda #@venda.Id"><img src="~/assets/icons/icone-edicao.svg" alt="Editar"></a></td>
-                                <td class="respiro-esq"><div class="col-venda">@venda.Id</div></td>
+                                <td class="respiro-esq"><a class="btn-icone d-inline-block" asp-controller="AlterarVenda" asp-action="Index" asp-route-id="@venda.Id" title="Editar venda #@venda.Id"><img src="~/assets/icons/icone-edicao.svg" alt="Editar"></a></td>
+                                <td class="text-center"><div class="col-venda">@venda.Id</div></td>
                                 <td class="col-nome">@venda.NomeCliente</td>
                                 <td>@telefone</td>
                                 <td>@venda.Data.ToString("dd/MM/yyyy")</td>
