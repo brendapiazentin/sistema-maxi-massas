@@ -124,13 +124,13 @@ function configurarFiltrosVendas() {
             if(linha.cells.length < 13) return; 
 
             // Textos para buscar no input livre (Nome e Telefone)
-            const nomeTel = normalizarBusca(linha.cells[1].textContent + " " + linha.cells[2].textContent);
+            const nomeTel = normalizarBusca(linha.cells[2].textContent + " " + linha.cells[3].textContent);
             
             // Coluna de Produtos (índice 5)
-            const produtosLinha = linha.cells[5].textContent.toLowerCase();
+            const produtosLinha = linha.cells[6].textContent.toLowerCase();
             
             // Data (índice 3)
-            const partesData = linha.cells[3].textContent.trim().split('/');
+            const partesData = linha.cells[4].textContent.trim().split('/');
             const mesLinha = partesData[1];
             const anoLinha = partesData[2];
 
@@ -544,7 +544,7 @@ function configurarFiltrosEstoque() {
         // Filtrar Tabela
         const linhas = document.querySelectorAll('.tabela-estoque tbody tr');
         linhas.forEach(linha => {
-            const produtoSabor = normalizarBusca(linha.cells[1].textContent + " " + linha.cells[2].textContent);
+            const produtoSabor = normalizarBusca(linha.cells[2].textContent + " " + linha.cells[3].textContent);
             const tipo = linha.querySelector('.tipo-item').textContent.toLowerCase();
             const status = linha.querySelector('.status-item').textContent.toLowerCase();
 
@@ -659,8 +659,8 @@ function configurarOrdenacaoProdutos() {
         // Faz a ordenação alfabética
         linhas.sort((a, b) => {
             // A coluna "Produto" é a segunda (índice 1)
-            const produtoA = a.cells[1].textContent.trim().toLowerCase();
-            const produtoB = b.cells[1].textContent.trim().toLowerCase();
+            const produtoA = a.cells[2].textContent.trim().toLowerCase();
+            const produtoB = b.cells[2].textContent.trim().toLowerCase();
 
             if (produtoA < produtoB) return ascendente ? -1 : 1;
             if (produtoA > produtoB) return ascendente ? 1 : -1;
@@ -692,8 +692,8 @@ function configurarBuscaProdutos() {
         const linhasTabela = document.querySelectorAll('.tabela-produtos tbody tr');
         linhasTabela.forEach(linha => {
             // Pega o texto da coluna Produto (índice 1) e Sabor (índice 2)
-            const produto = normalizarBusca(linha.cells[1].textContent);
-            const sabor = normalizarBusca(linha.cells[2].textContent);
+            const produto = normalizarBusca(linha.cells[2].textContent);
+            const sabor = normalizarBusca(linha.cells[3].textContent);
             
             // Se o texto digitado estiver no produto OU no sabor, mostra a linha
             if (produto.includes(termo) || sabor.includes(termo)) {

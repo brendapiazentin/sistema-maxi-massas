@@ -35,22 +35,30 @@
     position: relative;
 }
 
-/* Quadrado cinza ao lado dos links no menu lateral */
+/* Ícone ao lado dos links no menu lateral */
 .nav-link-custom::before {
     content: "";
     position: absolute;
-    left: 20px;
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    height: 12px;
-    width: 12px;
+    height: 22px;
+    width: 22px;
     background-color: gray;
-    border-radius: 2px;
+    -webkit-mask-repeat: no-repeat;  mask-repeat: no-repeat;
+    -webkit-mask-position: center;   mask-position: center;
+    -webkit-mask-size: contain;      mask-size: contain;
 }
+.nav-link-custom:hover::before { background-color: #9A1006; }
 
-.nav-link-custom:hover::before {
-    background-color: #9A1006;
-}
+.menu-dashboard::before { -webkit-mask-image: url('../assets/icons/icone-dashboard.svg'); mask-image: url('../assets/icons/icone-dashboard.svg'); }
+.menu-vendas::before    { -webkit-mask-image: url('../assets/icons/icone-carrinho.svg');  mask-image: url('../assets/icons/icone-carrinho.svg'); }
+.menu-clientes::before  { -webkit-mask-image: url('../assets/icons/icone-usuario.svg');   mask-image: url('../assets/icons/icone-usuario.svg'); }
+.menu-estoque::before   { -webkit-mask-image: url('../assets/icons/icone-estoque.svg');   mask-image: url('../assets/icons/icone-estoque.svg'); }
+.menu-produtos::before  { -webkit-mask-image: url('../assets/icons/icone-produtos.svg');  mask-image: url('../assets/icons/icone-produtos.svg'); }
+.menu-entregas::before  { -webkit-mask-image: url('../assets/icons/icone-entregas.svg');  mask-image: url('../assets/icons/icone-entregas.svg'); }
+.menu-evolucao::before  { -webkit-mask-image: url('../assets/icons/icone-tendencia.svg'); mask-image: url('../assets/icons/icone-tendencia.svg'); }
+.menu-usuarios::before  { -webkit-mask-image: url('../assets/icons/icone-usuarios.svg');  mask-image: url('../assets/icons/icone-usuarios.svg'); }
 
 /* Subtítulos (Padrão para PERÍODO e HISTÓRICO) */
 .subtitulo-secao {
