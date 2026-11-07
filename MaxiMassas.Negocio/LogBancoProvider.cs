@@ -85,7 +85,12 @@ public sealed class LogBancoProvider : ILoggerProvider
 
     private static bool Aceita(string categoria, LogLevel nivel)
     {
-        if (categoria.StartsWith("MaxiMassas.", StringComparison.Ordinal)) return nivel >= LogLevel.Information;
+        if (categoria.StartsWith("MaxiMassas.", StringComparison.Ordinal))
+        {
+            // Cada requisição do app sem login ou com senha errada gera um Info do BasicAuth: só polui a tabela.
+            if (categoria.EndsWith(".BasicAuthHandler", StringComparison.Ordinal)) return nivel >= LogLevel.Warning;
+            return nivel >= LogLevel.Information;
+        }
         if (categoria.StartsWith("Microsoft.AspNetCore.Diagnostics", StringComparison.Ordinal)) return nivel >= LogLevel.Error;
         return false;
     }

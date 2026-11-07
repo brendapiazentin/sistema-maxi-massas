@@ -45,6 +45,8 @@ public class NovaVendaController : PdvController
         if (Vm.Venda.TipoEntrega == "Delivery" && (Vm.Venda.Uf?.Trim().Length ?? 0) > 2) return "UF deve ter 2 letras (ex.: SP).";
         if (string.IsNullOrWhiteSpace(Vm.Venda.Plataforma)) return "Escolha a plataforma do pedido.";
         if (!PagamentoPorRotulo.TryGetValue(Vm.Venda.Pagamento, out pagamento)) return "Escolha a forma de pagamento.";
+        if (pagamento == FormaPagamento.PlataformaUaiRango && !TaxasPagamento.EhUaiRango(Vm.Venda.Plataforma))
+            return "\"Pago pela plataforma\" vale só para vendas do UAI Rango.";
         if (!StatusPorRotulo.TryGetValue(Vm.Venda.Status, out status)) return "Escolha o status da venda.";
         if (status.Venda == StatusVenda.EmProcessamento && Vm.Venda.TipoEntrega != "Delivery")
             return "\"Saiu para entrega\" vale só para vendas com Delivery.";
@@ -72,7 +74,9 @@ public class NovaVendaController : PdvController
                     ?? throw new KeyNotFoundException($"Produto ID {item.ProdutoId} não encontrado.");
                 subtotal += produto.PrecoVenda * item.Quantidade;
             }
-            taxa = (await ConfigEntrega.ObterAsync()).CalcularTaxa(subtotal);
+            var regra = await ConfigEntrega.ObterAsync();
+            // UAI Rango: a taxa de entrega é sempre cobrada, sem isenção pelo pedido mínimo (US12).
+            taxa = TaxasPagamento.EhUaiRango(Vm.Venda.Plataforma) ? regra.TaxaEntrega : regra.CalcularTaxa(subtotal);
         }
 
         return new VendaRequest

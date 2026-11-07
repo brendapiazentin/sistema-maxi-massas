@@ -106,6 +106,7 @@ public class ExportacaoNegocio : IExportacaoNegocio
         {
             ("Total Faturado", dto.TotalFaturado.ToString("C2")),
             ("Total de Custo", dto.TotalCusto.ToString("C2")),
+            ("Taxas de pagamento", dto.TotalTaxas.ToString("C2")),
             ("Lucro Bruto", dto.LucroBruto.ToString("C2")),
             ("Ticket Médio", dto.TicketMedio.ToString("C2")),
             ("Total de Vendas", dto.TotalVendas.ToString()),
@@ -263,8 +264,9 @@ public class ExportacaoNegocio : IExportacaoNegocio
                         // Linhas da tabela de resumo
                         AdicionarLinhaTabela(table, "Total Faturado", financeiro.TotalFaturado.ToString("C2"), true);
                         AdicionarLinhaTabela(table, "Total de Custo", financeiro.TotalCusto.ToString("C2"), false);
-                        AdicionarLinhaTabela(table, "Lucro Bruto", financeiro.LucroBruto.ToString("C2"), true);
-                        AdicionarLinhaTabela(table, "Ticket Médio", financeiro.TicketMedio.ToString("C2"), false);
+                        AdicionarLinhaTabela(table, "Taxas de pagamento", financeiro.TotalTaxas.ToString("C2"), true);
+                        AdicionarLinhaTabela(table, "Lucro Bruto", financeiro.LucroBruto.ToString("C2"), false);
+                        AdicionarLinhaTabela(table, "Ticket Médio", financeiro.TicketMedio.ToString("C2"), true);
                         AdicionarLinhaTabela(table, "Total de Vendas", financeiro.TotalVendas.ToString(), true);
                         AdicionarLinhaTabela(table, "Vendas Pagas", financeiro.VendasPagas.ToString(), false);
                         AdicionarLinhaTabela(table, "Vendas Pendentes", financeiro.VendasPendentes.ToString(), true);

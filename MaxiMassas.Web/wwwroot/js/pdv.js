@@ -11,6 +11,7 @@ const MODO_EDICAO = DADOS_PDV.modo === 'edicao';
 let bancoClientes = DADOS_PDV.clientes || [];
 let bancoProdutosPDV = DADOS_PDV.produtos || [];
 const regraEntregaPDV = DADOS_PDV.regraEntrega || { taxa: 0, minimoGratis: 0 };
+const taxasPagamentoPDV = DADOS_PDV.taxasPagamento || { debito: 0, credito: 0, uaiPlataforma: 0, uaiEntrega: 0 };
 
 // ESTADO GLOBAL DA VENDA (O carrinho de compras)
 let estadoVenda = estadoVazioPDV();
@@ -181,6 +182,18 @@ function acenderBotaoPDV(seletor, valorAtivo) {
     document.querySelectorAll(seletor).forEach(btn => btn.classList.toggle('active', btn.dataset.value === valorAtivo));
 }
 
+/** "Pago pela plataforma" só existe para o UAI Rango: aparece com essa plataforma e some (desmarcando) nas demais. */
+function atualizarBotaoUaiPDV() {
+    const ehUai = estadoVenda.plataforma === 'UAI Rango';
+    const botao = document.querySelector('.btn-pagamento-uai');
+    if (!botao) return;
+    botao.classList.toggle('d-none', !ehUai);
+    if (!ehUai && estadoVenda.pagamento === botao.dataset.value) {
+        estadoVenda.pagamento = '';
+        botao.classList.remove('active');
+    }
+}
+
 // Delivery: preenche data e hora com o momento atual (so se estiverem vazias; o vendedor pode alterar).
 function preencherDataHoraAtualPDV() {
     const agora = new Date();
@@ -222,6 +235,7 @@ function configurarBotoesTogglePDV() {
                 botoes.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 estadoVenda[grupo.campoEstado] = btn.dataset.value;
+                atualizarBotaoUaiPDV();
                 atualizarComandaPDV();
             });
         });
@@ -268,8 +282,19 @@ function definirTipoDescontoPDV(tipo) {
 function taxaEntregaPDV(subtotal) {
     if (estadoVenda.tipoEntrega !== 'Delivery') return 0;
     if (MODO_EDICAO) return estadoVenda.taxaEntrega || 0;
+    // UAI Rango: a taxa é sempre cobrada, sem isenção pelo pedido mínimo (US12).
+    if (estadoVenda.plataforma === 'UAI Rango') return regraEntregaPDV.taxa;
     const gratis = regraEntregaPDV.minimoGratis > 0 && subtotal >= regraEntregaPDV.minimoGratis;
     return gratis ? 0 : regraEntregaPDV.taxa;
+}
+
+/** US06: percentual descontado do faturamento, conforme a forma de pagamento e a plataforma (UAI Rango soma com o cartão). */
+function percentualTaxaPagamentoPDV() {
+    const t = taxasPagamentoPDV;
+    if (estadoVenda.pagamento === 'Pago pela plataforma') return t.uaiPlataforma;
+    const cartao = estadoVenda.pagamento === 'Cartão Débito' ? t.debito
+        : estadoVenda.pagamento === 'Cartão Crédito' ? t.credito : 0;
+    return estadoVenda.plataforma === 'UAI Rango' ? t.uaiEntrega + cartao : cartao;
 }
 // #endregion
 
@@ -477,6 +502,13 @@ function atualizarComandaPDV() {
     document.getElementById('comandaDesc').textContent = `- ${formatarReaisPDV(valorDesc)}`;
     document.getElementById('comandaTaxa').textContent = formatarReaisPDV(taxa);
     document.getElementById('comandaTotal').textContent = formatarReaisPDV(totalCalculado);
+
+    // US06: taxa de pagamento e valor líquido (o relatório usa a mesma regra no servidor)
+    const pctTaxa = percentualTaxaPagamentoPDV();
+    const valorTaxaPag = Math.round(totalCalculado * pctTaxa) / 100;
+    document.getElementById('comandaTaxaPagPct').textContent = String(pctTaxa).replace('.', ',');
+    document.getElementById('comandaTaxaPag').textContent = `- ${formatarReaisPDV(valorTaxaPag)}`;
+    document.getElementById('comandaLiquido').textContent = formatarReaisPDV(totalCalculado - valorTaxaPag);
 }
 
 // Botão Limpar Comanda
@@ -486,6 +518,7 @@ function limparPDV() {
 
     // Remove botões ativos
     document.querySelectorAll('.btn-toggle-pdv').forEach(b => b.classList.remove('active'));
+    atualizarBotaoUaiPDV();
 
     // Esconde endereco
     document.getElementById('blocoEnderecoPDV').classList.add('d-none');
@@ -538,6 +571,7 @@ function restaurarEstadoPDV(salvo) {
     document.getElementById('blocoEnderecoPDV').classList.toggle('d-none', estadoVenda.tipoEntrega !== 'Delivery');
     acenderBotaoPDV('.btn-plataforma', estadoVenda.plataforma);
     acenderBotaoPDV('.btn-pagamento', estadoVenda.pagamento);
+    atualizarBotaoUaiPDV();
     acenderBotaoPDV('.btn-status', estadoVenda.status);
     atualizarBotaoSaiuPDV();
 

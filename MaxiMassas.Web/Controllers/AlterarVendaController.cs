@@ -96,6 +96,8 @@ public class AlterarVendaController : PdvController
             Vm.Erro = "\"Saiu para entrega\" vale só para vendas com Delivery.";
         else if (!PagamentoPorRotulo.TryGetValue(Vm.Venda.Pagamento, out _)) Vm.Erro = "Escolha a forma de pagamento.";
         else if (string.IsNullOrWhiteSpace(Vm.Venda.Plataforma)) Vm.Erro = "Escolha a plataforma do pedido.";
+        else if (PagamentoPorRotulo[Vm.Venda.Pagamento] == FormaPagamento.PlataformaUaiRango && !TaxasPagamento.EhUaiRango(Vm.Venda.Plataforma))
+            Vm.Erro = "\"Pago pela plataforma\" vale só para vendas do UAI Rango.";
         else if ((Vm.Venda.Observacao?.Length ?? 0) > 500) Vm.Erro = "A observação pode ter no máximo 500 caracteres.";
 
         if (Vm.Erro is null)
