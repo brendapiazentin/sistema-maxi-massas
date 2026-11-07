@@ -29,10 +29,23 @@ public class AppDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<EnderecoCliente> EnderecosCliente => Set<EnderecoCliente>();
     public DbSet<ConfiguracaoEntrega> ConfiguracoesEntrega => Set<ConfiguracaoEntrega>();
+    public DbSet<LogSistema> LogsSistema => Set<LogSistema>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // ── LogSistema ────────────────────────────────────────────────────────
+        modelBuilder.Entity<LogSistema>(e => {
+            e.ToTable("LogsSistema");
+            e.HasKey(l => l.Id);
+            e.Property(l => l.Nivel).IsRequired().HasMaxLength(10);
+            e.Property(l => l.Origem).IsRequired().HasMaxLength(10);
+            e.Property(l => l.Categoria).IsRequired().HasMaxLength(150);
+            e.Property(l => l.Mensagem).IsRequired().HasMaxLength(2000);
+            e.Property(l => l.Excecao).HasMaxLength(4000);
+            e.HasIndex(l => l.DataHora);
+        });
 
         // ── Usuario ───────────────────────────────────────────────────────────
         modelBuilder.Entity<Usuario>(e => {
