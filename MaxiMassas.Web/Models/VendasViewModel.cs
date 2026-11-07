@@ -51,6 +51,7 @@ public class VendasViewModel
         FormaPagamento.CartaoDebito => "Cartão Débito",
         FormaPagamento.CartaoCredito => "Cartão Crédito",
         FormaPagamento.Transferencia => "Transferência",
+        FormaPagamento.PlataformaUaiRango => "Pago pela plataforma",
         FormaPagamento.Outro => "Outro",
         _ => "—"
     };

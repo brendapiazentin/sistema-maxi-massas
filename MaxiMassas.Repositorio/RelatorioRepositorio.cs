@@ -14,6 +14,7 @@ public class RelatorioRepositorio : IRelatorioRepositorio
 
     public Task<List<Venda>> GetVendasNaoCanceladasAsync(DateTime inicio, DateTime fimExclusivo)
         => _context.Vendas.AsNoTracking()
+            .Include(v => v.Pagamento)
             .Where(v => v.Data >= inicio && v.Data < fimExclusivo && v.Status != StatusVenda.Cancelada)
             .ToListAsync();
 

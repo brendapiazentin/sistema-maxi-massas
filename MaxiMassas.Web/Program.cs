@@ -81,7 +81,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<ClienteRequestValidator>();
 // --------------------------------------------
 
 // Backup automático do banco (RNF03): roda em segundo plano, só na Web, para não duplicar com a Api.
-builder.Services.AddHostedService<BackupService>();
+// No servidor (RDS) fica desligado com Backup__Ativo=false: o backup de lá é o automático do RDS.
+if (builder.Configuration.GetValue("Backup:Ativo", true))
+    builder.Services.AddHostedService<BackupService>();
 
 // Autenticação do painel: cookie de sessão criado em /Login.
 builder.Services.AddPainelAuth();
