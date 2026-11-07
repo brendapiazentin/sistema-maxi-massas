@@ -64,25 +64,34 @@ class _CardapioScreenState extends State<CardapioScreen> {
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
-        title: Row(
-          children: [
-            Image.asset(
-              'assets/logo.png',
-              height: 36,
-              errorBuilder: (c, e, s) => const Text('Maxi Massas Itápolis', style: TextStyle(color: Colors.white)),
-            ),
-            const SizedBox(width: 10),
-            const Icon(Icons.location_on, color: Colors.white, size: 16),
-            const SizedBox(width: 2),
-            const Expanded(
-              child: Text(
-                'Rua Joaquim Nabuco, 47\nJardim Karina',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white, fontSize: 12, height: 1.2),
+        toolbarHeight: 48,
+        title: Image.asset(
+          'assets/logo.png',
+          height: 36,
+          errorBuilder: (c, e, s) => const Text('Maxi Massas Itápolis', style: TextStyle(color: Colors.white)),
+        ),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(52),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                children: [
+                  Icon(Icons.location_on, color: Colors.white, size: 16),
+                  SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'R. Joaquim Nabuco, 47 - Jardim Karina, Itápolis - SP, 14900-021',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.white, fontSize: 12, height: 1.2),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
         actions: [
           IconButton(
