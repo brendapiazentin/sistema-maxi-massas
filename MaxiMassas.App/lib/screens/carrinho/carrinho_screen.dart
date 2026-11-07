@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/config.dart';
 import '../../core/formatos.dart';
 import '../../core/tema.dart';
 import '../../providers/carrinho_provider.dart';
@@ -64,6 +65,8 @@ class CarrinhoScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: Row(
                           children: [
+                            _FotoItem(url: item.produto.fotoUrl),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,6 +153,42 @@ class _Resumo extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _FotoItem extends StatelessWidget {
+  const _FotoItem({this.url});
+
+  final String? url;
+
+  static const double tamanho = 72;
+
+  @override
+  Widget build(BuildContext context) {
+    final vazio = Container(
+      width: tamanho,
+      height: tamanho,
+      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
+      child: Icon(Icons.restaurant, color: Colors.grey.shade500, size: 28),
+    );
+    if (url == null) return vazio;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        Config.urlAbsoluta(url!),
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.cover,
+        errorBuilder: (context, erro, pilha) => vazio,
+        loadingBuilder: (context, filho, progresso) => progresso == null
+            ? filho
+            : const SizedBox(
+                width: tamanho,
+                height: tamanho,
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
       ),
     );
   }
