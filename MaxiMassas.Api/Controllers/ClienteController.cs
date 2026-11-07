@@ -15,6 +15,11 @@ public class ClienteController : ControllerBase
 
     [HttpGet] public async Task<IActionResult> GetAll() => Ok(ApiResponse<IEnumerable<ClienteResponse>>.Ok(await _svc.GetAllAsync()));
 
+    /// <summary>Busca clientes pelo nome (trecho). Executa a stored procedure sp_Clientes_BuscarPorNome.</summary>
+    [HttpGet("buscar")]
+    public async Task<IActionResult> Buscar([FromQuery] string nome)
+        => Ok(ApiResponse<IEnumerable<ClienteResponse>>.Ok(await _svc.BuscarPorNomeAsync(nome)));
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {

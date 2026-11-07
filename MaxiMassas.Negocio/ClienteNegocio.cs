@@ -30,6 +30,20 @@ public class ClienteNegocio : IClienteNegocio
     public async Task<IEnumerable<ClienteResponse>> GetAllAsync()
         => _mapper.Map<IEnumerable<ClienteResponse>>(await _repo.GetAllAsync());
 
+    /// <summary>
+    /// Busca clientes por um trecho do nome. A consulta roda na stored procedure sp_Clientes_BuscarPorNome,
+    /// chamada pela camada de Repositório (Dapper); aqui só se prepara o texto e se monta a resposta.
+    /// </summary>
+    public async Task<IEnumerable<ClienteResponse>> BuscarPorNomeAsync(string nome)
+    {
+        nome = (nome ?? string.Empty).Trim();
+        if (nome.Length == 0) return Enumerable.Empty<ClienteResponse>();
+
+        // O trecho digitado é dado pessoal: o log guarda só o tamanho, não o texto.
+        _logger.LogInformation("[Clientes] Busca por nome pela stored procedure (trecho com {Tamanho} caracteres).", nome.Length);
+        return _mapper.Map<IEnumerable<ClienteResponse>>(await _repo.SearchByNomeAsync(nome));
+    }
+
     public async Task<ClienteResponse?> GetByIdAsync(int id)
     {
         var cliente = await _repo.GetByIdAsync(id);
