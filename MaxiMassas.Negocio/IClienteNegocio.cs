@@ -12,4 +12,6 @@ public interface IClienteNegocio
     Task<ClienteResponse?> UpdateAsync(int id, ClienteUpdateRequest request);
     Task<bool> DeleteAsync(int id);
     Task<EnderecoDto?> BuscarEnderecoPorCepAsync(string cep);
+    /// <summary>Clientes cujo nome contém o trecho informado (executa a stored procedure sp_Clientes_BuscarPorNome).</summary>
+    Task<IEnumerable<ClienteResponse>> BuscarPorNomeAsync(string nome);
 }
