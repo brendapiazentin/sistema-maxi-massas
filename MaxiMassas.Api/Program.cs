@@ -18,6 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Padrao")
     ?? throw new InvalidOperationException("Connection string 'Padrao' não encontrada no appsettings.json.");
 
+builder.Logging.AddLogBanco(connectionString, "Api");
+
 // ---------- Injeção de dependência ----------
 // LISTA DE MONTAGEM do sistema: cada linha ensina o ASP.NET Core a criar uma peça.
 // Cadeia típica: Controller -> *Negocio -> I*Repositorio -> AppDbContext (connection string).
