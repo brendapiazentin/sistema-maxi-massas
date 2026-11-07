@@ -15,6 +15,9 @@ public class LucroPorPeriodoDto
     public DateTime DataFim { get; set; }
     public decimal TotalFaturado { get; set; }
     public decimal TotalCusto { get; set; }
+    /// <summary>Taxas descontadas do faturamento (cartão e UAI Rango, US06).</summary>
+    public decimal TotalTaxas { get; set; }
+    /// <summary>Faturamento − custo − taxas.</summary>
     public decimal LucroBruto { get; set; }
     public decimal MargemLucro { get; set; }
 }
@@ -41,6 +44,9 @@ public class RelatorioFinanceiroDto
 {
     public decimal TotalFaturado { get; set; }
     public decimal TotalCusto { get; set; }
+    /// <summary>Taxas descontadas do faturamento (cartão e UAI Rango, US06).</summary>
+    public decimal TotalTaxas { get; set; }
+    /// <summary>Faturamento − custo − taxas.</summary>
     public decimal LucroBruto { get; set; }
     public decimal TicketMedio { get; set; }
     public int TotalVendas { get; set; }

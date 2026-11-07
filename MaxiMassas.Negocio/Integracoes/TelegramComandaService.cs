@@ -230,6 +230,7 @@ public class TelegramComandaService : ITelegramComandaService
         FormaPagamento.CartaoCredito => "Cartão de crédito",
         FormaPagamento.Pix => "Pix",
         FormaPagamento.Transferencia => "Transferência",
+        FormaPagamento.PlataformaUaiRango => "Pago pela plataforma (UAI Rango)",
         _ => "Outro"
     };
 }

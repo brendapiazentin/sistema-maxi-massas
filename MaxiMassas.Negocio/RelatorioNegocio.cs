@@ -36,15 +36,17 @@ public class RelatorioNegocio : IRelatorioNegocio
         var (ini, fimD) = NormalizarPeriodo(inicio, fim);
 
         var itens = await _repo.GetItensNaoCanceladosAsync(ini, fimD);
+        var vendas = await _repo.GetVendasNaoCanceladasAsync(ini, fimD);
 
         var faturamento = itens.Sum(i => i.Subtotal);
         var custo = itens.Sum(i => i.Produto.Custo * i.Quantidade);
-        var lucro = faturamento - custo;
+        var taxas = vendas.Sum(TaxasPagamento.Valor);
+        var lucro = faturamento - custo - taxas;
 
         return new LucroPorPeriodoDto
         {
             DataInicio = ini, DataFim = fim,
-            TotalFaturado = faturamento, TotalCusto = custo, LucroBruto = lucro,
+            TotalFaturado = faturamento, TotalCusto = custo, TotalTaxas = taxas, LucroBruto = lucro,
             MargemLucro = faturamento > 0 ? Math.Round(lucro / faturamento * 100, 2) : 0
         };
     }
@@ -82,12 +84,14 @@ public class RelatorioNegocio : IRelatorioNegocio
         var ativas = vendas.Where(v => v.Status != StatusVenda.Cancelada).ToList();
         var faturamento = ativas.Sum(v => v.ValorTotal);
         var custo = ativas.SelectMany(v => v.ItensVenda).Sum(i => i.Produto.Custo * i.Quantidade);
+        var taxas = ativas.Sum(TaxasPagamento.Valor);
 
         return new RelatorioFinanceiroDto
         {
             TotalFaturado = faturamento,
             TotalCusto = custo,
-            LucroBruto = faturamento - custo,
+            TotalTaxas = taxas,
+            LucroBruto = faturamento - custo - taxas,
             TicketMedio = ativas.Count > 0 ? ativas.Average(v => v.ValorTotal) : 0,
             TotalVendas = vendas.Count,
             // Usa StatusPagamento do Pagamento (UML) para contar pagas

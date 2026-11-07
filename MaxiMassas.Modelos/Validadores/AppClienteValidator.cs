@@ -69,6 +69,8 @@ public class PedidoAppRequestValidator : AbstractValidator<PedidoAppRequest>
         });
         RuleFor(p => p.TipoEntrega).IsInEnum().WithMessage("Tipo de entrega invalido.");
         RuleFor(p => p.FormaPagamento).IsInEnum().WithMessage("Forma de pagamento invalida.");
+        // "Pago pela plataforma" é exclusivo das vendas do UAI Rango lançadas no painel.
+        RuleFor(p => p.FormaPagamento).NotEqual(FormaPagamento.PlataformaUaiRango).WithMessage("Forma de pagamento invalida.");
         RuleFor(p => p.Endereco).NotNull().WithMessage("Informe o endereco de entrega.")
             .When(p => p.TipoEntrega == TipoEntrega.Entrega);
         RuleFor(p => p.Endereco!).SetValidator(new EnderecoAppRequestValidator())

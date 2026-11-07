@@ -148,6 +148,8 @@
                         <button type="button" class="btn-toggle-pdv btn-pagamento" data-value="Dinheiro">Dinheiro</button>
                         <button type="button" class="btn-toggle-pdv btn-pagamento" data-value="Cartão Débito">Cartão Débito</button>
                         <button type="button" class="btn-toggle-pdv btn-pagamento" data-value="Cartão Crédito">Cartão Crédito</button>
+                        <!-- Só aparece com a plataforma UAI Rango (pdv.js): taxa de 13,5% da plataforma -->
+                        <button type="button" class="btn-toggle-pdv btn-pagamento btn-pagamento-uai d-none" data-value="Pago pela plataforma">Pago pela plataforma</button>
                     </div>
                 </div>
 
@@ -252,9 +254,19 @@
                     </div>
 
                     <!-- VALOR FINAL -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2 mt-auto">
                         <span class="comanda-lbl-final">TOTAL</span>
                         <span class="comanda-val-final" id="comandaTotal">R$ 0,00</span>
+                    </div>
+
+                    <!-- US06: taxa descontada do faturamento (cartão / UAI Rango) e valor líquido da venda -->
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="comanda-lbl-total">Taxa de pagamento (<span id="comandaTaxaPagPct">0</span>%)</span>
+                        <span class="comanda-val-total text-danger" id="comandaTaxaPag">- R$ 0,00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="comanda-lbl-total fw-bold">Valor líquido</span>
+                        <span class="comanda-val-total fw-bold" id="comandaLiquido">R$ 0,00</span>
                     </div>
 
                     <!-- Ações -->

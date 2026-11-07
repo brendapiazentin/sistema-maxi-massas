@@ -48,6 +48,7 @@ public abstract class PdvController : PainelController
         ["Dinheiro"] = FormaPagamento.Dinheiro,
         ["Cartão Débito"] = FormaPagamento.CartaoDebito,
         ["Cartão Crédito"] = FormaPagamento.CartaoCredito,
+        ["Pago pela plataforma"] = FormaPagamento.PlataformaUaiRango, // só com a plataforma UAI Rango
     };
 
     /// <summary>Status da tela → (status da venda, status do pagamento). "Agendado" = EmEntrega (convenção da tela de Vendas).</summary>
@@ -129,6 +130,14 @@ public abstract class PdvController : PainelController
                 estoque = p.Estoque?.Quantidade ?? 0
             }),
             regraEntrega = new { taxa = regra.TaxaEntrega, minimoGratis = regra.PedidoMinimoEntregaGratis },
+            // Percentuais da US06 (mesma fonte dos relatórios), para a comanda mostrar o valor líquido.
+            taxasPagamento = new
+            {
+                debito = TaxasPagamento.CartaoDebito,
+                credito = TaxasPagamento.CartaoCredito,
+                uaiPlataforma = TaxasPagamento.UaiRangoPagoPelaPlataforma,
+                uaiEntrega = TaxasPagamento.UaiRangoPagoNaEntrega
+            },
             sugestoes = await SugestoesPorClienteAsync(),
             estado
         };
