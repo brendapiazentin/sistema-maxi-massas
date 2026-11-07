@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/ajuda.dart';
@@ -63,16 +64,36 @@ class _CardapioScreenState extends State<CardapioScreen> {
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
-        title: Image.asset(
-          'assets/logo.png',
-          height: 36,
-          errorBuilder: (c, e, s) => const Text('Maxi Massas Itápolis', style: TextStyle(color: Colors.white)),
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/logo.png',
+              height: 36,
+              errorBuilder: (c, e, s) => const Text('Maxi Massas Itápolis', style: TextStyle(color: Colors.white)),
+            ),
+            const SizedBox(width: 10),
+            const Icon(Icons.location_on, color: Colors.white, size: 16),
+            const SizedBox(width: 2),
+            const Expanded(
+              child: Text(
+                'Rua Joaquim Nabuco, 47\nJardim Karina',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: Colors.white, fontSize: 12, height: 1.2),
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
+            onPressed: () => mostrarHorariosLoja(context),
+            tooltip: 'Horários da loja',
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+          ),
+          IconButton(
             onPressed: () => abrirWhatsAppLoja(context),
-            tooltip: 'Precisa de ajuda?',
-            icon: const Icon(Icons.help_outline, color: Colors.white),
+            tooltip: 'Falar com a loja no WhatsApp',
+            icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white),
           ),
         ],
       ),
