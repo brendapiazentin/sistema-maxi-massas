@@ -109,6 +109,7 @@
                         <th>Entrega</th>
                         <th>Desconto</th>
                         <th>Valor Pago</th>
+                        <th>Líquido</th>
                         <th>Pagamento</th>
                         <th>Plataforma</th>
                         <th class="coluna-ordenavel">Status <span>↕</span></th>
@@ -117,7 +118,7 @@
                 <tbody>
                     @if (Model.Vendas.Count == 0)
                     {
-                        <tr><td colspan="14" class="text-center py-4">Nenhuma venda registrada</td></tr>
+                        <tr><td colspan="15" class="text-center py-4">Nenhuma venda registrada</td></tr>
                     }
                     @foreach (var venda in Model.Vendas)
                     {
@@ -138,6 +139,7 @@
                                 <td>@VendasViewModel.TextoEntrega(venda)</td>
                                 <td>@VendasViewModel.TextoDesconto(venda)</td>
                                 <td>@PainelFormatos.Moeda(venda.ValorTotal)</td>
+                                <td>@PainelFormatos.Moeda(venda.ValorTotal - MaxiMassas.Negocio.TaxasPagamento.Valor(venda.ValorTotal, venda.Origem, venda.Pagamento?.FormaPagamento))</td>
                                 <td>@VendasViewModel.RotuloPagamento(venda.Pagamento?.FormaPagamento)</td>
                                 <td>@(string.IsNullOrEmpty(venda.Origem) ? "—" : venda.Origem)</td>
                                 <td>@await Html.PartialAsync("_BotaoStatusVenda", venda)</td>
