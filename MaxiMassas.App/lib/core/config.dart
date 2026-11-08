@@ -7,7 +7,7 @@ class Config {
   static String urlAbsoluta(String caminho) => '$host$caminho';
 
   /// Versão exibida no rodapé do perfil (manter igual à do pubspec.yaml).
-  static const String versaoApp = '1.0.1';
+  static const String versaoApp = '1.0.2';
 
   /// Link do APK Android (publicado pelo deploy/publicar-apk.sh).
   static const String urlApk = '$host/downloads/maximassas.apk';

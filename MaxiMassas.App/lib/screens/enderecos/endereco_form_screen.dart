@@ -113,7 +113,7 @@ class _EnderecoFormScreenState extends State<EnderecoFormScreen> {
       body: Form(
         key: _form,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
           children: [
             const Text('Entregamos somente em Itápolis/SP.', style: TextStyle(color: Colors.black54)),
             const SizedBox(height: 12),
