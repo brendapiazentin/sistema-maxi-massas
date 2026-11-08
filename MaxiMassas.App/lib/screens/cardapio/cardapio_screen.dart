@@ -7,6 +7,7 @@ import '../../core/tema.dart';
 import '../../models/produto.dart';
 import '../../providers/cardapio_provider.dart';
 import '../../providers/carrinho_provider.dart';
+import '../../widgets/banner_android.dart';
 import '../../widgets/produto_card.dart';
 
 /// Cardápio com busca por nome, filtro por categoria e carregamento em esqueleto.
@@ -21,6 +22,7 @@ class _CardapioScreenState extends State<CardapioScreen> {
   final _busca = TextEditingController();
   String _termo = '';
   String? _categoria; // nulo = todas
+  bool _mostrarBanner = true;
 
   @override
   void dispose() {
@@ -64,7 +66,7 @@ class _CardapioScreenState extends State<CardapioScreen> {
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
-        toolbarHeight: 48,
+        toolbarHeight: 54,
         title: Image.asset(
           'assets/logo.png',
           height: 36,
@@ -108,6 +110,11 @@ class _CardapioScreenState extends State<CardapioScreen> {
       ),
       body: Column(
         children: [
+          if (_mostrarBanner && deveMostrarBannerAndroid)
+            BannerAndroid(
+              margem: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              aoFechar: () => setState(() => _mostrarBanner = false),
+            ),
           _campoBusca(),
           _chipsCategorias(cardapio),
           Expanded(child: _corpo(cardapio)),
