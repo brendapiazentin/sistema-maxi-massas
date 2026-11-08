@@ -30,7 +30,7 @@ public static class HorarioFuncionamento
 
     private static readonly string[] DiasSemana = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
 
-    /// <summary>Janela de atendimento do dia: o último horário oferecido é anterior ao fim.</summary>
+    /// <summary>Janela de atendimento do dia: o último horário oferecido é o próprio fim da janela.</summary>
     public static (TimeSpan Inicio, TimeSpan Fim) Janela(DayOfWeek dia, TipoEntrega tipo) => dia switch
     {
         DayOfWeek.Sunday => (Hora(10), Hora(13)),
@@ -62,7 +62,7 @@ public static class HorarioFuncionamento
         {
             var dia = agora.Date.AddDays(d);
             var (inicio, fim) = Janela(dia.DayOfWeek, tipo);
-            for (var h = dia + inicio; h < dia + fim; h += Intervalo)
+            for (var h = dia + inicio; h <= dia + fim; h += Intervalo)
             {
                 if (h < minimo) continue;
                 lista.Add(new HorarioAppResponse
@@ -91,7 +91,7 @@ public static class HorarioFuncionamento
         // ainda não ter passado e estar dentro do período de agendamento.
         var (inicio, fim) = Janela(escolhido.DayOfWeek, tipo);
         var hora = escolhido.TimeOfDay;
-        var valido = hora >= inicio && hora < fim
+        var valido = hora >= inicio && hora <= fim
                      && (hora - inicio).Ticks % Intervalo.Ticks == 0
                      && escolhido > agora
                      && escolhido.Date < agora.Date.AddDays(DiasParaAgendar);
