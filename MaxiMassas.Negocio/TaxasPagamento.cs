@@ -40,5 +40,9 @@ public static class TaxasPagamento
 
     /// <summary>Valor em reais da taxa da venda (zero se a venda ainda não tem pagamento).</summary>
     public static decimal Valor(Venda venda)
-        => Math.Round(venda.ValorTotal * Percentual(venda.Origem, venda.Pagamento?.FormaPagamento) / 100m, 2, MidpointRounding.AwayFromZero);
+        => Valor(venda.ValorTotal, venda.Origem, venda.Pagamento?.FormaPagamento);
+
+    /// <summary>Mesma taxa, a partir dos dados da venda (a lista de Vendas trabalha com o DTO).</summary>
+    public static decimal Valor(decimal valorTotal, string? origem, FormaPagamento? forma)
+        => Math.Round(valorTotal * Percentual(origem, forma) / 100m, 2, MidpointRounding.AwayFromZero);
 }

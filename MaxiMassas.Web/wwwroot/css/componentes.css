@@ -2403,3 +2403,20 @@
 .btn-status-opcao { justify-content: flex-start; padding: 10px 14px; font-size: 14px; }
 .btn-status-opcao:disabled { opacity: 1; cursor: default; }
 
+
+/* Impressão da comanda (botão Imprimir do PDV): imprime só a comanda, sem os dados internos do negócio */
+@media print {
+    body * { visibility: hidden; }
+    #comandaImprimivel, #comandaImprimivel * { visibility: visible; }
+    #comandaImprimivel {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none;
+        border: none;
+    }
+    #comandaImprimivel .btn-imprimir,
+    #comandaImprimivel .comanda-acoes,
+    #comandaImprimivel .comanda-interno { display: none !important; }
+}
