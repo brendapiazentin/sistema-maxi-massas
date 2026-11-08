@@ -12,3 +12,42 @@ Future<void> abrirWhatsAppLoja(BuildContext context) async {
     );
   }
 }
+
+Future<void> mostrarHorariosLoja(BuildContext context) {
+  const dias = [
+    ('Segunda a sexta', '10h às 20h', '18h às 20h'),
+    ('Sábado', '10h às 20h', '13h às 20h'),
+    ('Domingo', '10h às 13h', '10h às 13h'),
+  ];
+  return showDialog<void>(
+    context: context,
+    builder: (ctx) {
+      final tema = Theme.of(ctx);
+      return AlertDialog(
+        title: const Text('Horários de funcionamento'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final (dia, loja, entrega) in dias) ...[
+                Text(dia, style: tema.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text('Loja aberta e retirada: $loja'),
+                Text('Entrega: $entrega'),
+                const SizedBox(height: 12),
+              ],
+              Text(
+                'O horário de cada pedido é escolhido ao finalizar a compra.',
+                style: tema.textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Fechar')),
+        ],
+      );
+    },
+  );
+}
