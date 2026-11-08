@@ -40,6 +40,7 @@ public class ExportacaoNegocio : IExportacaoNegocio
     // Cores da marca (mesmas do painel e do app).
     private const string CorMarca = "#9A1006";
     private const string CorMarcaEscura = "#6E0B04";
+    private static readonly System.Globalization.CultureInfo PtBr = new System.Globalization.CultureInfo("pt-BR");
 
     public ExportacaoNegocio(IRelatorioNegocio relatorioService, ILogger<ExportacaoNegocio> logger)
     {
@@ -101,24 +102,25 @@ public class ExportacaoNegocio : IExportacaoNegocio
         ws.Cell(2, 1).Value = $"Período: {inicio:dd/MM/yyyy} até {fim:dd/MM/yyyy}";
         ws.Cell(2, 1).Style.Font.Italic = true;
 
-        // Dados em par chave:valor
-        var linhas = new[]
+        // Dados em par rótulo:valor. Os valores são gravados como número (e não como texto), com formato de moeda quando for o caso.
+        var linhas = new (string Rotulo, decimal Valor, bool Moeda)[]
         {
-            ("Total Faturado", dto.TotalFaturado.ToString("C2")),
-            ("Total de Custo", dto.TotalCusto.ToString("C2")),
-            ("Taxas de pagamento", dto.TotalTaxas.ToString("C2")),
-            ("Lucro Bruto", dto.LucroBruto.ToString("C2")),
-            ("Ticket Médio", dto.TicketMedio.ToString("C2")),
-            ("Total de Vendas", dto.TotalVendas.ToString()),
-            ("Vendas Pagas", dto.VendasPagas.ToString()),
-            ("Vendas Pendentes", dto.VendasPendentes.ToString()),
-            ("Vendas Canceladas", dto.VendasCanceladas.ToString()),
+            ("Total Faturado", dto.TotalFaturado, true),
+            ("Total de Custo", dto.TotalCusto, true),
+            ("Taxas de pagamento", dto.TotalTaxas, true),
+            ("Lucro Bruto", dto.LucroBruto, true),
+            ("Ticket Médio", dto.TicketMedio, true),
+            ("Total de Vendas", dto.TotalVendas, false),
+            ("Vendas Pagas", dto.VendasPagas, false),
+            ("Vendas Pendentes", dto.VendasPendentes, false),
+            ("Vendas Canceladas", dto.VendasCanceladas, false),
         };
 
         for (int i = 0; i < linhas.Length; i++)
         {
-            ws.Cell(4 + i, 1).Value = linhas[i].Item1;
-            ws.Cell(4 + i, 2).Value = linhas[i].Item2;
+            ws.Cell(4 + i, 1).Value = linhas[i].Rotulo;
+            ws.Cell(4 + i, 2).Value = linhas[i].Valor;
+            ws.Cell(4 + i, 2).Style.NumberFormat.Format = linhas[i].Moeda ? "R$ #,##0.00" : "0";
             ws.Cell(4 + i, 1).Style.Font.Bold = true;
         }
 
@@ -262,11 +264,12 @@ public class ExportacaoNegocio : IExportacaoNegocio
                         });
 
                         // Linhas da tabela de resumo
-                        AdicionarLinhaTabela(table, "Total Faturado", financeiro.TotalFaturado.ToString("C2"), true);
-                        AdicionarLinhaTabela(table, "Total de Custo", financeiro.TotalCusto.ToString("C2"), false);
-                        AdicionarLinhaTabela(table, "Taxas de pagamento", financeiro.TotalTaxas.ToString("C2"), true);
-                        AdicionarLinhaTabela(table, "Lucro Bruto", financeiro.LucroBruto.ToString("C2"), false);
-                        AdicionarLinhaTabela(table, "Ticket Médio", financeiro.TicketMedio.ToString("C2"), true);
+                        AdicionarLinhaTabela(table, "Total Faturado", financeiro.TotalFaturado.ToString("C2", PtBr), true);
+                        AdicionarLinhaTabela(table, "Total de Custo", financeiro.TotalCusto.ToString("C2", PtBr), false);
+                        AdicionarLinhaTabela(table, "Taxas de pagamento", financeiro.TotalTaxas.ToString("C2", PtBr), true);
+                        AdicionarLinhaTabela(table, "Lucro Bruto", financeiro.LucroBruto.ToString("C2", PtBr), false);
+                        AdicionarLinhaTabela(table, "Ticket Médio", financeiro.TicketMedio.ToString("C2", PtBr), true);
+                        table.Cell().ColumnSpan(2).PaddingVertical(4).BorderBottom(1).BorderColor("#9CA3AC");
                         AdicionarLinhaTabela(table, "Total de Vendas", financeiro.TotalVendas.ToString(), true);
                         AdicionarLinhaTabela(table, "Vendas Pagas", financeiro.VendasPagas.ToString(), false);
                         AdicionarLinhaTabela(table, "Vendas Pendentes", financeiro.VendasPendentes.ToString(), true);
@@ -309,7 +312,7 @@ public class ExportacaoNegocio : IExportacaoNegocio
                             table.Cell().Background(bg).Padding(4).Text(pos.ToString());
                             table.Cell().Background(bg).Padding(4).Text(p.NomeProduto);
                             table.Cell().Background(bg).Padding(4).Text(p.QuantidadeVendida.ToString());
-                            table.Cell().Background(bg).Padding(4).Text(p.TotalFaturado.ToString("C2"));
+                            table.Cell().Background(bg).Padding(4).Text(p.TotalFaturado.ToString("C2", PtBr));
                             pos++;
                         }
                     });
@@ -347,7 +350,7 @@ public class ExportacaoNegocio : IExportacaoNegocio
                             var bg = c.Posicao % 2 == 0 ? Colors.Grey.Lighten4 : Colors.White;
                             table.Cell().Background(bg).Padding(4).Text(c.Posicao.ToString());
                             table.Cell().Background(bg).Padding(4).Text(c.NomeCliente);
-                            table.Cell().Background(bg).Padding(4).Text(c.TotalGasto.ToString("C2"));
+                            table.Cell().Background(bg).Padding(4).Text(c.TotalGasto.ToString("C2", PtBr));
                             table.Cell().Background(bg).Padding(4).Text(c.QuantidadeCompras.ToString());
                         }
                     });
