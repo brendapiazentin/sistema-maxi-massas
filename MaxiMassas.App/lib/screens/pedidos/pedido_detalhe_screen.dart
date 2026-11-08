@@ -104,7 +104,7 @@ class _PedidoDetalheScreenState extends State<PedidoDetalheScreen> {
       body: RefreshIndicator(
         onRefresh: _atualizar,
         child: ListView(
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: EdgeInsets.only(bottom: 24 + MediaQuery.of(context).padding.bottom),
           children: [
             if (widget.recemCriado)
               Container(
