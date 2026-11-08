@@ -43,10 +43,10 @@
                            value="@Model.ExportarFim.ToString("yyyy-MM-dd")" required>
                 </div>
                 <div class="col-6 col-md-3">
-                    <button type="submit" name="handler" value="Excel" class="btn-salvar-custom w-100">Baixar Excel</button>
+                    <button type="submit" formaction="@Url.Action("Excel", "Evolucao")" class="btn-salvar-custom w-100">Baixar Excel</button>
                 </div>
                 <div class="col-6 col-md-3">
-                    <button type="submit" name="handler" value="Pdf" class="btn-secundario w-100">Baixar PDF</button>
+                    <button type="submit" formaction="@Url.Action("Pdf", "Evolucao")" class="btn-secundario w-100">Baixar PDF</button>
                 </div>
             </form>
         </div>
