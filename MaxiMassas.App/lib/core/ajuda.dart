@@ -15,8 +15,8 @@ Future<void> abrirWhatsAppLoja(BuildContext context) async {
 
 Future<void> mostrarHorariosLoja(BuildContext context) {
   const dias = [
-    ('Segunda a sexta', '10h às 20h', '18h às 20h'),
-    ('Sábado', '10h às 20h', '13h às 20h'),
+    ('Segunda a sexta', '10h às 19h', '18h às 19h30'),
+    ('Sábado', '10h às 19h', '13h às 19h30'),
     ('Domingo', '10h às 13h', '10h às 13h'),
   ];
   return showDialog<void>(
@@ -33,7 +33,7 @@ Future<void> mostrarHorariosLoja(BuildContext context) {
               for (final (dia, loja, entrega) in dias) ...[
                 Text(dia, style: tema.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 2),
-                Text('Loja aberta e retirada: $loja'),
+                Text('Retirada na loja: $loja'),
                 Text('Entrega: $entrega'),
                 const SizedBox(height: 12),
               ],

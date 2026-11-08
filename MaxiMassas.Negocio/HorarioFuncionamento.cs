@@ -1,8 +1,8 @@
 // HorarioFuncionamento — janelas de atendimento da loja, usadas pelo app do cliente.
 //
-// Regra informada pelos proprietários (29/10/2026):
-//   Segunda a sexta: retirada 10h–20h; entregas 18h–20h.
-//   Sábado:          retirada 10h–20h; entregas 13h–20h.
+// Regra informada pelos proprietários (atualizada em 07/11/2026):
+//   Segunda a sexta: retirada 10h–19h; entregas 18h–19h30.
+//   Sábado:          retirada 10h–19h; entregas 13h–19h30.
 //   Domingo:         retirada e entregas 10h–13h.
 //
 // A mesma classe gera os horários oferecidos ao app (GET /api/app/horarios) e valida o
@@ -30,12 +30,12 @@ public static class HorarioFuncionamento
 
     private static readonly string[] DiasSemana = { "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb" };
 
-    /// <summary>Janela de atendimento do dia: o último horário oferecido é anterior ao fim.</summary>
+    /// <summary>Janela de atendimento do dia: o último horário oferecido é o próprio fim da janela.</summary>
     public static (TimeSpan Inicio, TimeSpan Fim) Janela(DayOfWeek dia, TipoEntrega tipo) => dia switch
     {
         DayOfWeek.Sunday => (Hora(10), Hora(13)),
-        DayOfWeek.Saturday => tipo == TipoEntrega.Entrega ? (Hora(13), Hora(20)) : (Hora(10), Hora(20)),
-        _ => tipo == TipoEntrega.Entrega ? (Hora(18), Hora(20)) : (Hora(10), Hora(20))
+        DayOfWeek.Saturday => tipo == TipoEntrega.Entrega ? (Hora(13), Hora(19, 30)) : (Hora(10), Hora(19)),
+        _ => tipo == TipoEntrega.Entrega ? (Hora(18), Hora(19, 30)) : (Hora(10), Hora(19))
     };
 
     /// <summary>Hora oficial de Brasília, independente do fuso configurado no servidor.</summary>
@@ -62,7 +62,7 @@ public static class HorarioFuncionamento
         {
             var dia = agora.Date.AddDays(d);
             var (inicio, fim) = Janela(dia.DayOfWeek, tipo);
-            for (var h = dia + inicio; h < dia + fim; h += Intervalo)
+            for (var h = dia + inicio; h <= dia + fim; h += Intervalo)
             {
                 if (h < minimo) continue;
                 lista.Add(new HorarioAppResponse
@@ -91,7 +91,7 @@ public static class HorarioFuncionamento
         // ainda não ter passado e estar dentro do período de agendamento.
         var (inicio, fim) = Janela(escolhido.DayOfWeek, tipo);
         var hora = escolhido.TimeOfDay;
-        var valido = hora >= inicio && hora < fim
+        var valido = hora >= inicio && hora <= fim
                      && (hora - inicio).Ticks % Intervalo.Ticks == 0
                      && escolhido > agora
                      && escolhido.Date < agora.Date.AddDays(DiasParaAgendar);
@@ -102,7 +102,7 @@ public static class HorarioFuncionamento
         return escolhido;
     }
 
-    private static TimeSpan Hora(int h) => TimeSpan.FromHours(h);
+    private static TimeSpan Hora(int h, int min = 0) => new(h, min, 0);
 
     private static string Nome(TipoEntrega tipo) => tipo == TipoEntrega.Entrega ? "entrega" : "retirada";
 
