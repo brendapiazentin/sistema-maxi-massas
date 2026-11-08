@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../core/tema.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/banner_android.dart';
 import 'acesso_layout.dart';
 import 'cadastro_screen.dart';
 import 'esqueci_senha_screen.dart';
@@ -53,6 +54,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (deveMostrarBannerAndroid) ...[
+              const BannerAndroid(),
+              const SizedBox(height: 20),
+            ],
             const Text('Bem-vindo(a)!', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
             const Text('Entre para fazer seu pedido', style: TextStyle(color: Colors.black54)),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/ajuda.dart';
 import '../../core/api_client.dart';
+import '../../core/config.dart';
 import '../../core/tema.dart';
 import '../../models/cliente.dart';
 import '../../providers/auth_provider.dart';
@@ -97,6 +98,15 @@ class PerfilScreen extends StatelessWidget {
             leading: const Icon(Icons.logout, color: Tema.vinho),
             title: const Text('Sair', style: TextStyle(color: Tema.vinho)),
             onTap: () => _sair(context),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(
+                'Versão ${Config.versaoApp}',
+                style: const TextStyle(color: Colors.black45, fontSize: 12),
+              ),
+            ),
           ),
         ],
       ),
