@@ -200,14 +200,14 @@
             <!-- COLUNA 3: COMANDA FINAL -->
             <div class="col-12 col-lg-4">
                 
-                <div class="card-venda-p pdv-card h-100 d-flex flex-column">
+                <div id="comandaImprimivel" class="card-venda-p pdv-card h-100 d-flex flex-column">
                     <!-- Cabeçalho Comanda -->
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <div class="d-flex flex-column">
                             <span class="pdv-titulo">Comanda</span>
                             <span class="comanda-info" id="infoComandaHeader">Pedido #0000 • Carregando...</span>
                         </div>
-                        <button type="button" class="btn-imprimir">
+                        <button type="button" class="btn-imprimir" onclick="window.print()">
                         <span>Imprimir</span>
                         </button>
                     </div>
@@ -260,17 +260,17 @@
                     </div>
 
                     <!-- US06: taxa descontada do faturamento (cartão / UAI Rango) e valor líquido da venda -->
-                    <div class="d-flex justify-content-between mb-1">
+                    <div class="d-flex justify-content-between mb-1 comanda-interno">
                         <span class="comanda-lbl-total">Taxa de pagamento (<span id="comandaTaxaPagPct">0</span>%)</span>
                         <span class="comanda-val-total text-danger" id="comandaTaxaPag">- R$ 0,00</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-4">
+                    <div class="d-flex justify-content-between mb-4 comanda-interno">
                         <span class="comanda-lbl-total fw-bold">Valor líquido</span>
                         <span class="comanda-val-total fw-bold" id="comandaLiquido">R$ 0,00</span>
                     </div>
 
                     <!-- Ações -->
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 comanda-acoes">
                         <button type="button" class="btn-cancelar-custom flex-grow-1" id="btnLimparPDV" onclick="limparPDV()">Limpar Comanda</button>
 
                         <!-- Salvar: envia a comanda ao servidor. Os campos ocultos são preenchidos pelo pdv.js. -->
