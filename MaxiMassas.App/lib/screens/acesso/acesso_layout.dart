@@ -64,7 +64,7 @@ class AcessoLayout extends StatelessWidget {
                 ),
                 child: SingleChildScrollView(
                   keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                  padding: EdgeInsets.fromLTRB(24, 28, 24, 24 + MediaQuery.of(context).padding.bottom),
                   child: child,
                 ),
               ),
