@@ -181,6 +181,27 @@
                                 <small class="text-muted d-block mt-1">Número de identificação do Telegram de cada pessoa que recebe a comanda. Deixe em branco para não enviar.</small>
                             </div>
 
+                            <!-- Horários de funcionamento (somente leitura): vêm de HorarioFuncionamento, a mesma regra usada pelo aplicativo -->
+                            <div class="col-12 p-0 mt-3">
+                                @{
+                                    string FormatarHora(TimeSpan tempo) => tempo.Minutes == 0 ? $"{tempo.Hours}h" : $"{tempo.Hours}h{tempo.Minutes:00}";
+                                    string FaixaHorario(DayOfWeek diaSemana, MaxiMassas.Modelos.TipoEntrega tipoAtendimento)
+                                    {
+                                        var (inicioJanela, fimJanela) = MaxiMassas.Negocio.HorarioFuncionamento.Janela(diaSemana, tipoAtendimento);
+                                        return $"{FormatarHora(inicioJanela)} às {FormatarHora(fimJanela)}";
+                                    }
+                                    var diasHorario = new[] { ("Segunda a sexta", DayOfWeek.Monday), ("Sábado", DayOfWeek.Saturday), ("Domingo", DayOfWeek.Sunday) };
+                                }
+                                <span class="form-label-custom d-block">Horários de funcionamento</span>
+                                <div class="small">
+                                    @foreach (var (rotuloDia, diaDaSemana) in diasHorario)
+                                    {
+                                        <div class="mb-1"><strong>@rotuloDia:</strong> retirada @FaixaHorario(diaDaSemana, MaxiMassas.Modelos.TipoEntrega.Retirada) · entrega @FaixaHorario(diaDaSemana, MaxiMassas.Modelos.TipoEntrega.Entrega)</div>
+                                    }
+                                </div>
+                                <small class="text-muted d-block mt-1">Estes são os horários que o aplicativo oferece aos clientes.</small>
+                            </div>
+
                             <!-- Mensagem de erro do salvamento (ou aviso de quem não pode alterar) -->
                             <div class="col-12 p-0 mt-3">
                                 @if (Model.ErroTaxa is not null)
