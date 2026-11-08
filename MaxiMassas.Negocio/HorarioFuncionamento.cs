@@ -1,8 +1,8 @@
 // HorarioFuncionamento — janelas de atendimento da loja, usadas pelo app do cliente.
 //
-// Regra informada pelos proprietários (29/10/2026):
-//   Segunda a sexta: retirada 10h–20h; entregas 18h–20h.
-//   Sábado:          retirada 10h–20h; entregas 13h–20h.
+// Regra informada pelos proprietários (atualizada em 07/11/2026):
+//   Segunda a sexta: retirada 10h–19h; entregas 18h–19h30.
+//   Sábado:          retirada 10h–19h; entregas 13h–19h30.
 //   Domingo:         retirada e entregas 10h–13h.
 //
 // A mesma classe gera os horários oferecidos ao app (GET /api/app/horarios) e valida o
@@ -34,8 +34,8 @@ public static class HorarioFuncionamento
     public static (TimeSpan Inicio, TimeSpan Fim) Janela(DayOfWeek dia, TipoEntrega tipo) => dia switch
     {
         DayOfWeek.Sunday => (Hora(10), Hora(13)),
-        DayOfWeek.Saturday => tipo == TipoEntrega.Entrega ? (Hora(13), Hora(20)) : (Hora(10), Hora(20)),
-        _ => tipo == TipoEntrega.Entrega ? (Hora(18), Hora(20)) : (Hora(10), Hora(20))
+        DayOfWeek.Saturday => tipo == TipoEntrega.Entrega ? (Hora(13), Hora(19, 30)) : (Hora(10), Hora(19)),
+        _ => tipo == TipoEntrega.Entrega ? (Hora(18), Hora(19, 30)) : (Hora(10), Hora(19))
     };
 
     /// <summary>Hora oficial de Brasília, independente do fuso configurado no servidor.</summary>
@@ -102,7 +102,7 @@ public static class HorarioFuncionamento
         return escolhido;
     }
 
-    private static TimeSpan Hora(int h) => TimeSpan.FromHours(h);
+    private static TimeSpan Hora(int h, int min = 0) => new(h, min, 0);
 
     private static string Nome(TipoEntrega tipo) => tipo == TipoEntrega.Entrega ? "entrega" : "retirada";
 
