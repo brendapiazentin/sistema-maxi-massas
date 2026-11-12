@@ -2403,20 +2403,31 @@
 .btn-status-opcao { justify-content: flex-start; padding: 10px 14px; font-size: 14px; }
 .btn-status-opcao:disabled { opacity: 1; cursor: default; }
 
+/* Impressão da comanda (botão Imprimir do PDV): imprime só a comanda*/
+@page {
+    size: 80mm auto;
+    margin: 8mm;
+}
 
-/* Impressão da comanda (botão Imprimir do PDV): imprime só a comanda, sem os dados internos do negócio */
+#areaImpressaoComanda { display: none; }
+
 @media print {
-    body * { visibility: hidden; }
-    #comandaImprimivel, #comandaImprimivel * { visibility: visible; }
-    #comandaImprimivel {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
+    /* Esconde menu, colunas do PDV, rodapé etc. (display:none não ocupa espaço, então não gera páginas em branco) */
+    body.imprimindo-comanda > *:not(#areaImpressaoComanda) { display: none !important; }
+
+    body.imprimindo-comanda {
+        display: block;
+        min-height: 0;
+        background: #FFF;
+    }
+
+    body.imprimindo-comanda #areaImpressaoComanda { display: block; }
+
+    #areaImpressaoComanda .pdv-card {
         box-shadow: none;
         border: none;
+        padding: 0;
     }
-    #comandaImprimivel .btn-imprimir,
-    #comandaImprimivel .comanda-acoes,
-    #comandaImprimivel .comanda-interno { display: none !important; }
+
+    #areaImpressaoComanda .comanda-item-row { break-inside: avoid; }
 }
