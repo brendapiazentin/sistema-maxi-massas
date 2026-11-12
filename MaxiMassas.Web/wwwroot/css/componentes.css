@@ -2405,7 +2405,7 @@
 
 /* Impressão da comanda (botão Imprimir do PDV): imprime só a comanda*/
 @page {
-    size: 80mm auto;
+    size: A5;
     margin: 8mm;
 }
 
@@ -2430,4 +2430,36 @@
     }
 
     #areaImpressaoComanda .comanda-item-row { break-inside: avoid; }
+}
+
+
+/* Nova Venda (PDV): em telas largas, Produtos e Comanda ficam com a altura da coluna Cliente e rolam por dentro */
+@media (min-width: 992px) {
+    #colProdutosPDV,
+    #colComandaPDV {
+        contain: size;       /* a altura vem da 1ª coluna, não do conteúdo */
+        min-height: 640px;
+    }
+
+    /* Coluna 2: o card Produtos ocupa o espaço e a lista rola; Desconto fica fixo embaixo */
+    #colProdutosPDV > .pdv-card:first-child {
+        flex: 1 1 0;
+        min-height: 0;
+    }
+    #containerProdutosPDV {
+        flex: 1 1 0;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    /* Coluna 3: a lista de itens rola; totais e botões ficam sempre visíveis */
+    #colComandaPDV #comandaImprimivel {
+        height: 100%;
+        min-height: 0;
+    }
+    #colComandaPDV .comanda-lista-itens {
+        flex: 1 1 0;
+        min-height: 80px;
+        overflow-y: auto;
+    }
 }
