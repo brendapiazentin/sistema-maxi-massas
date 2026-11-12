@@ -670,3 +670,32 @@ function atualizarBotaoSaiuPDV() {
         }
     });
 }
+
+// IMPRESSÃO DA COMANDA
+// Imprime só a comanda: copia o bloco para uma área própria e o CSS de impressão esconde o resto da tela.
+function imprimirComandaPDV() {
+    const original = document.getElementById('comandaImprimivel');
+    if (!original) return;
+
+    const copia = original.cloneNode(true);
+    copia.removeAttribute('id');
+    copia.classList.remove('h-100');
+    // Remove o que não vai no papel e os ids repetidos (a cópia já carrega os textos preenchidos)
+    copia.querySelectorAll('.btn-imprimir, .comanda-acoes, .comanda-interno').forEach(el => el.remove());
+    copia.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+
+    const area = document.createElement('div');
+    area.id = 'areaImpressaoComanda';
+    area.appendChild(copia);
+    document.body.appendChild(area);
+    document.body.classList.add('imprimindo-comanda');
+
+    const limpar = () => {
+        document.body.classList.remove('imprimindo-comanda');
+        area.remove();
+        window.removeEventListener('afterprint', limpar);
+    };
+    window.addEventListener('afterprint', limpar);
+
+    window.print();
+}
